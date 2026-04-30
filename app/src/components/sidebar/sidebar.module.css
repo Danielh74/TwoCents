@@ -1,0 +1,21 @@
+.navContainer {
+    display: flex;
+    width: 15%;
+    height: calc(100vh - 2rem);
+    margin-top: 1rem;
+    margin-left: 1rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 15px;
+    padding-top: 30px;
+}
+
+.links {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-left: 30px;
+    width: 100%;
+    align-items: start;
+    font-size: large;
+    font-weight: 600;
+}
