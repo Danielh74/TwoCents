@@ -1,6 +1,6 @@
 'use client';
 
-import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Sector, Legend, Tooltip, ResponsiveContainer, PieSectorShapeProps } from 'recharts';
 
 interface PieChartProps {
     data: Array<{
@@ -10,9 +10,39 @@ interface PieChartProps {
     colors?: string[];
 }
 
+interface DataItem {
+    name: string;
+    value: number;
+}
+
 export default function RadialChart({ data, colors = ['#3b82f6', '#ef4444'] }: PieChartProps) {
+
+    const MyCustomPie = (props: PieSectorShapeProps) => {
+        return <Sector {...props} fill={colors[props.index % colors.length]} />;
+    };
+
+    const renderCustomLegend = () => {
+        return (
+            <div className={`flex justify-center gap-5 mt-2.5 flex-wrap`}>
+                {data && data.map((item: DataItem, index: number) => (
+                    <div key={`legend-${index}`} className='flex items-center gap-1.5'>
+                        <div
+                            style={{
+                                width: '12px',
+                                height: '12px',
+                                backgroundColor: colors[index % colors.length],
+                                borderRadius: '2px',
+                            }}
+                        />
+                        <span className='text-[14px]'>{item.name}</span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     return (
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width='50%' height={300}>
             <PieChart>
                 <Pie
                     data={data}
@@ -22,13 +52,11 @@ export default function RadialChart({ data, colors = ['#3b82f6', '#ef4444'] }: P
                     outerRadius={100}
                     paddingAngle={2}
                     dataKey="value"
-                >
-                    {data.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                    ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => `$${value}`} />
-                <Legend />
+                    nameKey="name"
+                    shape={MyCustomPie}
+                />
+                <Tooltip formatter={(value) => `$${value}`} />
+                <Legend content={renderCustomLegend} />
             </PieChart>
         </ResponsiveContainer>
     );

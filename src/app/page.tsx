@@ -22,16 +22,29 @@ export default function Dashboard() {
     <main className={`flex h-full flex-col gap-3`}>
       <article className={`flex flex-1 justify-center`}>
         <SummaryCard title="Income & Expenses">
-          <div className={`w-full`}>
-            <div className="text-sm mb-4">Income: ${incomeAmount} | Expenses: ${expensesAmount}</div>
+          <div className={`flex flex-1 justify-center w-full`}>
+            <div className="text-sm mb-4">
+              <h1 className="text-xl text-blue-500">Income</h1>
+              {data.map(income => { return income.type === 'income' && <p>{income.title} - {income.amount}</p> })}
+            </div>
             <RadialChart data={chartData} />
+            <div className="text-sm mb-4">
+              <h1 className="text-xl text-red-500">Expenses</h1>
+              {data.map(expense => { return expense.type === 'expense' && <p>{expense.title} - {expense.amount}</p> })}
+            </div>
           </div>
         </SummaryCard>
       </article>
       <article className={`flex flex-1 gap-3 justify-around`}>
-        <SummaryCard title="Budgets"></SummaryCard>
-        <SummaryCard title="Transactions" ></SummaryCard>
-        <SummaryCard title="Settings"></SummaryCard>
+        <SummaryCard title="Budgets">
+          <div></div>
+        </SummaryCard>
+        <SummaryCard title="Transactions" >
+          <div></div>
+        </SummaryCard>
+        <SummaryCard title="Settings">
+          <div></div>
+        </SummaryCard>
       </article>
     </main>
   )
