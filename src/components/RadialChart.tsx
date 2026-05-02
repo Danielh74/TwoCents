@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { PieChart, Pie, Sector, Legend, Tooltip, ResponsiveContainer, PieSectorShapeProps } from 'recharts';
 
 interface PieChartProps {
@@ -16,9 +17,30 @@ interface DataItem {
 }
 
 export default function RadialChart({ data, colors = ['#3b82f6', '#ef4444'] }: PieChartProps) {
+    const [activeIndex, setActiveIndex] = useState<number | null>(null);
+    
+    const renderCustomShape = (props: PieSectorShapeProps) => {
+        const isActive = activeIndex === props.index;
+        const isInactive = activeIndex !== null && activeIndex !== props.index;
 
-    const MyCustomPie = (props: PieSectorShapeProps) => {
-        return <Sector {...props} fill={colors[props.index % colors.length]} />;
+        const fill = isInactive ? '#d1d5db' : colors[props.index % colors.length];
+        const scale = isActive ? 1.15 : (isInactive ? 0.9 : 1);
+
+        return (
+            <g
+                onMouseEnter={() => setActiveIndex(props.index)}
+                onMouseLeave={() => setActiveIndex(null)}
+                style={{ cursor: 'pointer', transition: 'all 0.3s ease-out' }}
+            >
+                <Sector
+                    {...props}
+                    fill={fill}
+                    outerRadius={props.outerRadius! * scale}
+                    filter={isActive ? 'drop-shadow(0 0 8px rgba(0,0,0,0.3))' : 'none'}
+                    opacity={isInactive ? 0.6 : 1}
+                />
+            </g>
+        );
     };
 
     const renderCustomLegend = () => {
@@ -53,7 +75,8 @@ export default function RadialChart({ data, colors = ['#3b82f6', '#ef4444'] }: P
                     paddingAngle={2}
                     dataKey="value"
                     nameKey="name"
-                    shape={MyCustomPie}
+                    shape={renderCustomShape}
+                    isAnimationActive={false}
                 />
                 <Tooltip formatter={(value) => `$${value}`} />
                 <Legend content={renderCustomLegend} />
@@ -61,3 +84,4 @@ export default function RadialChart({ data, colors = ['#3b82f6', '#ef4444'] }: P
         </ResponsiveContainer>
     );
 }
+
