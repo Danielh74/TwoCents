@@ -32,7 +32,7 @@ export default function RootLayout({
         <aside className="flex flex-1">
           <Sidebar />
         </aside>
-        <main className="flex-4 p-4 rounded-2xl overflow-auto">
+        <main className="flex-4 py-4 pr-4 rounded-2xl overflow-auto">
           {children}
         </main>
       </body>
