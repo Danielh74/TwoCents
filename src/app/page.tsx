@@ -6,8 +6,7 @@ import SummaryCard from "../components/SummaryCard"
 import RadialChart from "../components/RadialChart"
 import ProgressBar from '../components/ProgressBar'
 import TransactionInfo from '../components/TransactionInfo'
-
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+import { MONTHS } from './lib/utils'
 
 export default function Dashboard() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // May (0-indexed)
