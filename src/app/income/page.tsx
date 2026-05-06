@@ -7,7 +7,6 @@ import { MONTHS } from '../lib/utils'
 import { Transaction } from '../lib/definitions'
 
 interface IncomeForm {
-    id: number | null
     title: string
     amount: string
     category: string
@@ -21,10 +20,9 @@ export default function IncomePage() {
     )
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-    const [isEditing, setIsEditing] = useState(false)
+    const [editingId, setEditingId] = useState<number | null>(null)
 
     const [formData, setFormData] = useState<IncomeForm>({
-        id: null,
         title: '',
         amount: '',
         category: '',
@@ -54,15 +52,14 @@ export default function IncomePage() {
     }
 
     const handleEditTransaction = (income: Transaction) => {
-        setIsEditing(true);
+        setEditingId(income.id);
         setFormData({
-            id: income.id,
             title: income.title,
             amount: income.amount.toString(),
             category: income.category,
             date: income.date,
             notes: income.notes
-        })
+        });
     }
 
     const handlePreviousMonth = () => {
@@ -91,26 +88,21 @@ export default function IncomePage() {
             return
         }
 
-        if (isEditing) {
-            const newIncome = {
-                id: Number(formData.id),
-                title: formData.title,
-                amount: parseFloat(formData.amount),
-                category: formData.category,
-                date: formData.date,
-                notes: formData.notes,
-                type: 'income' as const
-            }
+        if (editingId !== null) {
+            setIncomeList(incomeList.map(income =>
+                income.id === editingId ?
+                    {
+                        ...income,
+                        title: formData.title,
+                        amount: parseFloat(formData.amount),
+                        category: formData.category,
+                        date: formData.date,
+                        notes: formData.notes
+                    } :
+                    income
+            ));
 
-            setIncomeList(prev => {
-                return prev.map(income =>
-                    income.id === newIncome.id
-                        ? newIncome
-                        : income
-                );
-            });
-
-            setIsEditing(false);
+            setEditingId(null);
         } else {
             const newIncome = {
                 id: Math.max(...incomeList.map(i => i.id), 0) + 1,
@@ -126,7 +118,6 @@ export default function IncomePage() {
         }
 
         setFormData({
-            id: null,
             title: '',
             amount: '',
             category: '',
@@ -226,7 +217,7 @@ export default function IncomePage() {
                                 type="submit"
                                 className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
                             >
-                                {isEditing ? "Edit" : "Add"} Income
+                                {editingId !== null ? "Edit" : "Add"} Income
                             </button>
                         </form>
                     </SummaryCard>
