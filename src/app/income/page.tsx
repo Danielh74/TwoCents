@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { transactions } from '../lib/data'
+import { useTransactions } from '../lib/useTransactions'
 import SummaryCard from '../../components/SummaryCard'
 import { MONTHS } from '../lib/utils'
 import { Transaction } from '../lib/definitions'
@@ -15,9 +15,7 @@ interface IncomeForm {
 }
 
 export default function IncomePage() {
-    const [incomeList, setIncomeList] = useState(
-        transactions.filter(t => t.type === 'income')
-    )
+    const { transactions, isLoaded, addTransaction, updateTransaction, deleteTransaction } = useTransactions()
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [editingId, setEditingId] = useState<number | null>(null)
@@ -32,15 +30,19 @@ export default function IncomePage() {
 
     const incomeCategories = ['Salary', 'Freelance', 'Rent', 'Investment', 'Business', 'Other']
 
+    const incomeList = useMemo(() => {
+        return transactions.filter((t: Transaction) => t.type === 'income')
+    }, [transactions])
+
     const filteredIncomeList = useMemo(() => {
-        return incomeList.filter(income => {
+        return incomeList.filter((income: Transaction) => {
             const [year, month] = income.date.split('-').map(Number)
             return year === currentYear && month === currentMonth + 1
         })
     }, [incomeList, currentMonth, currentYear])
 
     const totalIncome = useMemo(() => {
-        return filteredIncomeList.reduce((sum, income) => sum + income.amount, 0)
+        return filteredIncomeList.reduce((sum: number, income: Transaction) => sum + income.amount, 0)
     }, [filteredIncomeList])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -80,7 +82,7 @@ export default function IncomePage() {
         }
     }
 
-    const handleSubmit = (e: React.SubmitEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!formData.title || !formData.amount || !formData.category || !formData.date) {
@@ -89,32 +91,24 @@ export default function IncomePage() {
         }
 
         if (editingId !== null) {
-            setIncomeList(incomeList.map(income =>
-                income.id === editingId ?
-                    {
-                        ...income,
-                        title: formData.title,
-                        amount: parseFloat(formData.amount),
-                        category: formData.category,
-                        date: formData.date,
-                        notes: formData.notes
-                    } :
-                    income
-            ));
-
-            setEditingId(null);
-        } else {
-            const newIncome = {
-                id: Math.max(...incomeList.map(i => i.id), 0) + 1,
+            updateTransaction(editingId, {
                 title: formData.title,
                 amount: parseFloat(formData.amount),
                 category: formData.category,
                 date: formData.date,
                 notes: formData.notes,
-                type: 'income' as const
-            }
-
-            setIncomeList([...incomeList, newIncome])
+                type: 'income'
+            });
+            setEditingId(null);
+        } else {
+            addTransaction({
+                title: formData.title,
+                amount: parseFloat(formData.amount),
+                category: formData.category,
+                date: formData.date,
+                notes: formData.notes,
+                type: 'income'
+            });
         }
 
         setFormData({
@@ -124,6 +118,27 @@ export default function IncomePage() {
             date: new Date().toISOString().split('T')[0],
             notes: ''
         })
+    }
+
+    const handleCancel = () => {
+        setEditingId(null)
+        setFormData({
+            title: '',
+            amount: '',
+            category: '',
+            date: new Date().toISOString().split('T')[0],
+            notes: ''
+        })
+    }
+
+    const handleDelete = (id: number) => {
+        if (confirm('Are you sure you want to delete this income?')) {
+            deleteTransaction(id)
+        }
+    }
+
+    if (!isLoaded) {
+        return <main className="flex h-[calc(100vh-2rem)] items-center justify-center p-4">Loading...</main>
     }
 
     return (
@@ -146,7 +161,7 @@ export default function IncomePage() {
             <div className="flex gap-4 h-full overflow-hidden">
                 {/* Form Section */}
                 <div className="flex-1 min-w-0">
-                    <SummaryCard title="Add New Income">
+                    <SummaryCard title={editingId ? "Edit Income" : "Add New Income"}>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
@@ -213,12 +228,23 @@ export default function IncomePage() {
                                 />
                             </div>
 
-                            <button
-                                type="submit"
-                                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
-                            >
-                                {editingId !== null ? "Edit" : "Add"} Income
-                            </button>
+                            <div className="flex gap-3">
+                                <button
+                                    type="submit"
+                                    className="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                                >
+                                    {editingId !== null ? "Update Income" : "Add Income"}
+                                </button>
+                                {editingId && (
+                                    <button
+                                        type="button"
+                                        onClick={handleCancel}
+                                        className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
                         </form>
                     </SummaryCard>
                 </div>
@@ -233,8 +259,7 @@ export default function IncomePage() {
                                     .map(income => (
                                         <div
                                             key={income.id}
-                                            className="flex justify-between items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                                            onClick={() => handleEditTransaction(income)}
+                                            className="flex justify-between items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
                                         >
                                             <div className="flex-1">
                                                 <p className="font-medium text-gray-900">{income.title}</p>
@@ -246,9 +271,25 @@ export default function IncomePage() {
                                                     <p className="text-xs text-gray-400 mt-2 italic">{income.notes}</p>
                                                 )}
                                             </div>
-                                            <span className="text-lg font-bold text-green-500 ml-4">
-                                                +${income.amount.toFixed(2)}
-                                            </span>
+                                            <div className="flex gap-2 ml-4 items-center">
+                                                <span className="text-lg font-bold text-green-500 min-w-fit">
+                                                    +${income.amount.toFixed(2)}
+                                                </span>
+                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={() => handleEditTransaction(income)}
+                                                        className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded transition-colors"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(income.id)}
+                                                        className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded transition-colors"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))
                             ) : (

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { transactions, budgets } from '../lib/data'
+import { budgets } from '../lib/data'
+import { useTransactions } from '../lib/useTransactions'
 import SummaryCard from '../../components/SummaryCard'
 import { MONTHS } from '../lib/utils'
 import { Transaction } from '../lib/definitions'
@@ -15,9 +16,7 @@ interface ExpenseForm {
 }
 
 export default function ExpensesPage() {
-    const [expenseList, setExpenseList] = useState(
-        transactions.filter(t => t.type === 'expense')
-    )
+    const { transactions, isLoaded, addTransaction, updateTransaction, deleteTransaction } = useTransactions()
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
     const [editingId, setEditingId] = useState<number | null>(null)
@@ -32,15 +31,19 @@ export default function ExpensesPage() {
 
     const expenseCategories = budgets.map(b => b.category).sort()
 
+    const expenseList = useMemo(() => {
+        return transactions.filter((t: Transaction) => t.type === 'expense')
+    }, [transactions])
+
     const filteredExpenseList = useMemo(() => {
-        return expenseList.filter(expense => {
+        return expenseList.filter((expense: Transaction) => {
             const [year, month] = expense.date.split('-').map(Number)
             return year === currentYear && month === currentMonth + 1
         })
     }, [expenseList, currentMonth, currentYear])
 
     const totalExpenses = useMemo(() => {
-        return filteredExpenseList.reduce((sum, expense) => sum + expense.amount, 0)
+        return filteredExpenseList.reduce((sum: number, expense: Transaction) => sum + expense.amount, 0)
     }, [filteredExpenseList])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -90,31 +93,25 @@ export default function ExpensesPage() {
 
         if (editingId !== null) {
             // Update existing expense
-            setExpenseList(expenseList.map(expense =>
-                expense.id === editingId
-                    ? {
-                        ...expense,
-                        title: formData.title,
-                        amount: parseFloat(formData.amount),
-                        category: formData.category,
-                        date: formData.date,
-                        notes: formData.notes
-                    }
-                    : expense
-            ))
-            setEditingId(null)
-        } else {
-            // Add new expense
-            const newExpense = {
-                id: Math.max(...expenseList.map(i => i.id), 0) + 1,
+            updateTransaction(editingId, {
                 title: formData.title,
                 amount: parseFloat(formData.amount),
                 category: formData.category,
                 date: formData.date,
                 notes: formData.notes,
-                type: 'expense' as const
-            }
-            setExpenseList([...expenseList, newExpense])
+                type: 'expense'
+            })
+            setEditingId(null)
+        } else {
+            // Add new expense
+            addTransaction({
+                title: formData.title,
+                amount: parseFloat(formData.amount),
+                category: formData.category,
+                date: formData.date,
+                notes: formData.notes,
+                type: 'expense'
+            })
         }
 
         setFormData({
@@ -139,8 +136,12 @@ export default function ExpensesPage() {
 
     const handleDelete = (id: number) => {
         if (confirm('Are you sure you want to delete this expense?')) {
-            setExpenseList(expenseList.filter(expense => expense.id !== id))
+            deleteTransaction(id)
         }
+    }
+
+    if (!isLoaded) {
+        return <main className="flex h-[calc(100vh-2rem)] items-center justify-center p-4">Loading...</main>
     }
 
     return (
@@ -254,7 +255,7 @@ export default function ExpensesPage() {
                 {/* Expenses List Section */}
                 <div className="flex-1 min-w-0">
                     <SummaryCard title="Expense List">
-                        <div className="space-y-3 w-full h-full overflow-y-auto scrollbar-custom pr-2">
+                        <div className="space-y-3 w-full overflow-y-auto max-h-full scrollbar-custom pr-2">
                             {filteredExpenseList.length > 0 ? (
                                 [...filteredExpenseList]
                                     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())

@@ -122,7 +122,7 @@ export default function Dashboard() {
           </div>
         </SummaryCard>
         <SummaryCard title="Settings">
-          <div className="flex flex-col justify-around space-y-3 w-full text-sm overflow-y-auto h-full scrollbar-custom pr-2">
+          <div className="flex flex-col gap-5 justify-around space-y-3 w-full text-sm overflow-y-auto h-full scrollbar-custom pr-2">
             <div className="flex justify-between items-center pb-2 border-b border-gray-200">
               <span className="text-gray-600">Currency</span>
               <span className="font-medium">USD</span>
