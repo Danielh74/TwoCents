@@ -1,23 +1,25 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { budgets, transactions } from "./lib/data"
+import { budgets } from "./lib/data"
 import SummaryCard from "../components/SummaryCard"
 import RadialChart from "../components/RadialChart"
 import ProgressBar from '../components/ProgressBar'
 import TransactionInfo from '../components/TransactionInfo'
 import { MONTHS } from './lib/utils'
+import { useTransactions } from './lib/useTransactions'
 
 export default function Dashboard() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // May (0-indexed)
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const { transactions, isLoaded } = useTransactions();
 
   const filteredData = useMemo(() => {
     return transactions.filter(transaction => {
       const [year, month] = transaction.date.split('-').map(Number);
       return year === currentYear && month === currentMonth + 1;
     });
-  }, [currentMonth, currentYear]);
+  }, [currentMonth, currentYear, transactions]);
 
   const { incomeAmount, expensesAmount } = useMemo(() => {
     return filteredData.reduce(
@@ -47,7 +49,7 @@ export default function Dashboard() {
         remaining: budget.value - totalExpense
       }
     });
-  }, [currentMonth, currentYear]);
+  }, [currentMonth, currentYear, transactions]);
 
   const handlePreviousMonth = () => {
     if (currentMonth === 0) {
@@ -66,6 +68,10 @@ export default function Dashboard() {
       setCurrentMonth(currentMonth + 1);
     }
   };
+
+  if (!isLoaded) {
+    return <main className="flex h-[calc(100vh-2rem)] items-center justify-center p-4">Loading...</main>
+  }
 
   return (
     <main className={`flex h-[calc(100vh-2rem)] flex-col gap-3`}>

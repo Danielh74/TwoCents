@@ -8,7 +8,7 @@ const STORAGE_KEY = 'twocents_transactions'
 
 export function useTransactions() {
     const [isLoaded, setIsLoaded] = useState(false);
-    const [transactions, setTransactions] = useState(() => {
+    const [transactions, setTransactions] = useState<Transaction[]>(() => {
 
         const storedData = localStorage.getItem(STORAGE_KEY);
         if (!storedData) {
@@ -28,10 +28,13 @@ export function useTransactions() {
 
     // Save to localStorage whenever transactions change
     useEffect(() => {
-        if (isLoaded) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions))
-        }
-    }, [transactions, isLoaded])
+        if (!isLoaded) return;
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(transactions)
+        );
+    }, [transactions, isLoaded]);
 
     const addTransaction = (transaction: Omit<Transaction, "id">) => {
         const newId = Math.max(...transactions.map((t: Transaction) => t.id), 0) + 1
@@ -39,21 +42,18 @@ export function useTransactions() {
             ...transaction,
             id: newId
         }
-        const updatedList = [...transactions, newTransaction];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
-        setTransactions(updatedList);
+
+        setTransactions([...transactions, newTransaction]);
         return newTransaction;
     }
 
     const updateTransaction = (id: number, updates: Omit<Transaction, "id">) => {
         const updatedList = transactions.map((t: Transaction) => t.id === id ? { ...t, ...updates } : t);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
         setTransactions(updatedList);
     }
 
     const deleteTransaction = (id: number) => {
         const updatedList = transactions.filter((t: Transaction) => t.id !== id);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
         setTransactions(updatedList);
     }
 

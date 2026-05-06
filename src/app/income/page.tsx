@@ -15,7 +15,7 @@ interface IncomeForm {
 }
 
 export default function IncomePage() {
-    const { transactions, isLoaded, addTransaction, updateTransaction, deleteTransaction } = useTransactions()
+    const { transactions, isLoaded, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [editingId, setEditingId] = useState<number | null>(null)
@@ -31,18 +31,18 @@ export default function IncomePage() {
     const incomeCategories = ['Salary', 'Freelance', 'Rent', 'Investment', 'Business', 'Other']
 
     const incomeList = useMemo(() => {
-        return transactions.filter((t: Transaction) => t.type === 'income')
+        return transactions.filter(t => t.type === 'income')
     }, [transactions])
 
     const filteredIncomeList = useMemo(() => {
-        return incomeList.filter((income: Transaction) => {
+        return incomeList.filter(income => {
             const [year, month] = income.date.split('-').map(Number)
             return year === currentYear && month === currentMonth + 1
         })
     }, [incomeList, currentMonth, currentYear])
 
     const totalIncome = useMemo(() => {
-        return filteredIncomeList.reduce((sum: number, income: Transaction) => sum + income.amount, 0)
+        return filteredIncomeList.reduce((sum, income) => sum + income.amount, 0)
     }, [filteredIncomeList])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
