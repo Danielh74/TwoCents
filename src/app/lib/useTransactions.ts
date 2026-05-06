@@ -8,23 +8,27 @@ const STORAGE_KEY = 'twocents_transactions'
 
 export function useTransactions() {
     const [isLoaded, setIsLoaded] = useState(false);
-    const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const [transactions, setTransactions] = useState<Transaction[]>([])
 
-        const storedData = localStorage.getItem(STORAGE_KEY);
-        if (!storedData) {
+    useEffect(() => {
+        const fetchData = () => {
+            const data = localStorage.getItem(STORAGE_KEY)
+            if (data) {
+                try {
+                    const parsedData = JSON.parse(data);
+                    setTransactions(parsedData);
+                } catch (error) {
+                    console.error("Failed to parse the data:", error);
+                    setTransactions(initialTransactions)
+                }
+            } else {
+                setTransactions(initialTransactions)
+            }
             setIsLoaded(true);
-            return initialTransactions;
-        }
+        };
 
-        try {
-            return JSON.parse(storedData);
-        } catch (error) {
-            console.error("Failed to parse transactions:", error)
-            return initialTransactions
-        } finally {
-            setIsLoaded(true);
-        }
-    });
+        fetchData();
+    }, [])
 
     // Save to localStorage whenever transactions change
     useEffect(() => {
