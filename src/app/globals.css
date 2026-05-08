@@ -5,11 +5,16 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1e2939;
-    --foreground: #ededed;
-  }
+[data-theme='light'] {
+  --background: white;
+  --foreground: black;
+  --third-color: #c1c1c1;
+}
+
+[data-theme='dark'] {
+  --background: #1e2939;
+  --foreground: white;
+  --secondary-color: #cfcfcf;
 }
 
 body {

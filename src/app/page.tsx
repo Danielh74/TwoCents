@@ -8,11 +8,13 @@ import ProgressBar from '../components/ProgressBar'
 import TransactionInfo from '../components/TransactionInfo'
 import { MONTHS } from './lib/utils'
 import { useTransactions } from './lib/useTransactions'
+import { useTheme } from 'next-themes'
 
 export default function Dashboard() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // May (0-indexed)
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const { transactions, isLoaded } = useTransactions();
+  const { theme, setTheme } = useTheme();
 
   const filteredData = useMemo(() => {
     return transactions.filter(transaction => {
@@ -135,7 +137,11 @@ export default function Dashboard() {
             </div>
             <div className="flex justify-between items-center pb-2 border-b border-gray-200">
               <span className="text-gray-600">Theme</span>
-              <span className="font-medium">Light</span>
+              <button
+                className="cursor-pointer font-medium"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                {theme}
+              </button>
             </div>
             <div className="flex justify-between items-center pb-2 border-b border-gray-200">
               <span className="text-gray-600">Notifications</span>
