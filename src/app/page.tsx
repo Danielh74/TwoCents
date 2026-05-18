@@ -2,19 +2,18 @@
 
 import { useState, useMemo } from 'react'
 import { budgets } from "./lib/data"
-import SummaryCard from "../components/SummaryCard"
+import Card from "../components/Card"
 import RadialChart from "../components/RadialChart"
 import ProgressBar from '../components/ProgressBar'
 import TransactionInfo from '../components/TransactionInfo'
 import { MONTHS } from './lib/utils'
 import { useTransactions } from './lib/useTransactions'
-import { useTheme } from 'next-themes'
+import ThemeToggler from '../components/ThemeToggler'
 
 export default function Dashboard() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // May (0-indexed)
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const { transactions, isLoaded } = useTransactions();
-  const { theme, setTheme } = useTheme();
 
   const filteredData = useMemo(() => {
     return transactions.filter(transaction => {
@@ -76,11 +75,11 @@ export default function Dashboard() {
   }
 
   return (
-    <main className={`flex h-[calc(100vh-2rem)] flex-col gap-3`}>
-      <article className={`flex-6 flex justify-center overflow-hidden`}>
-        <SummaryCard title="Overview">
+    <main className={`flex h-[calc(100vh-2rem)] flex-col gap-3 min-h-0`}>
+      <article className={`flex-6 flex justify-center min-h-0`}>
+        <Card title="Overview" fill>
           <div className={`flex flex-col w-full h-full`}>
-            <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
+            <div className="flex justify-between items-center mb-2 pb-4 border-b border-gray-200">
               <button onClick={handlePreviousMonth} className="px-2 py-1 rounded hover:bg-gray-200">←</button>
               <h2 className="text-lg font-semibold">{MONTHS[currentMonth]} {currentYear}</h2>
               <button onClick={handleNextMonth} className="px-2 py-1 rounded hover:bg-gray-200">→</button>
@@ -97,11 +96,11 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        </SummaryCard>
+        </Card>
       </article>
-      <article className={`flex-4 flex gap-3 justify-around overflow-hidden`}>
-        <SummaryCard title="Budgets">
-          <div className="space-y-4 w-full overflow-y-auto max-h-full scrollbar-custom pr-2">
+      <article className={`flex-4 flex gap-3 justify-around min-h-0`}>
+        <Card title="Budgets" fill>
+          <div className="space-y-4 w-full h-full overflow-y-auto scrollbar-custom pr-2">
             {monthlyExpenses.map(budget =>
               <ProgressBar
                 key={budget.category}
@@ -112,9 +111,9 @@ export default function Dashboard() {
               />
             )}
           </div>
-        </SummaryCard>
-        <SummaryCard title="Transactions" >
-          <div className="space-y-3 w-full max-h-full overflow-y-auto scrollbar-custom pr-2">
+        </Card>
+        <Card title="Transactions" fill>
+          <div className="space-y-4 w-full h-full overflow-y-auto scrollbar-custom pr-2">
             {filteredData.length > 0 ? (
               [...filteredData].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(transaction =>
                 <TransactionInfo
@@ -128,8 +127,8 @@ export default function Dashboard() {
               <p className="text-gray-400 text-center text-sm">No transactions this month</p>
             )}
           </div>
-        </SummaryCard>
-        <SummaryCard title="Settings">
+        </Card>
+        <Card title="Settings" fill>
           <div className="flex flex-col gap-5 justify-around space-y-3 w-full text-sm overflow-y-auto h-full scrollbar-custom pr-2">
             <div className="flex justify-between items-center pb-2 border-b border-gray-200">
               <span className="text-gray-600">Currency</span>
@@ -137,11 +136,7 @@ export default function Dashboard() {
             </div>
             <div className="flex justify-between items-center pb-2 border-b border-gray-200">
               <span className="text-gray-600">Theme</span>
-              <button
-                className="cursor-pointer font-medium"
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-                {theme}
-              </button>
+              <ThemeToggler />
             </div>
             <div className="flex justify-between items-center pb-2 border-b border-gray-200">
               <span className="text-gray-600">Notifications</span>
@@ -152,7 +147,7 @@ export default function Dashboard() {
               <span className="text-blue-500 cursor-pointer hover:underline">Download</span>
             </div>
           </div>
-        </SummaryCard>
+        </Card>
       </article>
     </main>
   )

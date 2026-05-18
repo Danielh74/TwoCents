@@ -18,7 +18,7 @@ interface DataItem {
 
 export default function RadialChart({ data, colors = ['#3b82f6', '#ef4444'] }: PieChartProps) {
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
-    
+
     const renderCustomShape = (props: PieSectorShapeProps) => {
         const isActive = activeIndex === props.index;
         const isInactive = activeIndex !== null && activeIndex !== props.index;
@@ -64,7 +64,7 @@ export default function RadialChart({ data, colors = ['#3b82f6', '#ef4444'] }: P
     };
 
     return (
-        <ResponsiveContainer width='50%' height={300}>
+        <ResponsiveContainer width='50%' height={270}>
             <PieChart>
                 <Pie
                     data={data}

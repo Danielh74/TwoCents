@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, SubmitEvent } from 'react'
 import { budgets } from '../lib/data'
 import { useTransactions } from '../lib/useTransactions'
-import SummaryCard from '../../components/SummaryCard'
+import Card from '../../components/Card'
 import { MONTHS } from '../lib/utils'
 import { Transaction } from '../lib/definitions'
 
@@ -83,7 +83,7 @@ export default function ExpensesPage() {
         })
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: SubmitEvent) => {
         e.preventDefault()
 
         if (!formData.title || !formData.amount || !formData.category || !formData.date) {
@@ -145,7 +145,7 @@ export default function ExpensesPage() {
     }
 
     return (
-        <main className="flex h-[calc(100vh-2rem)] flex-col gap-3 p-4">
+        <main className="flex h-[calc(100vh-2rem)] flex-col gap-3 p-4 min-h-0">
             <div className="flex justify-between items-center mb-2">
                 <h1 className="text-3xl font-bold">Expenses</h1>
                 <div className="flex items-center gap-4">
@@ -163,8 +163,8 @@ export default function ExpensesPage() {
 
             <div className="flex gap-4 h-full overflow-hidden">
                 {/* Form Section */}
-                <div className="flex-1 min-w-0">
-                    <SummaryCard title={editingId ? "Edit Expense" : "Add New Expense"}>
+                <div className="flex flex-1 gap-4 min-h-0">
+                    <Card title={editingId ? "Edit Expense" : "Add New Expense"}>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
@@ -204,6 +204,7 @@ export default function ExpensesPage() {
                                         {expenseCategories.map(cat => (
                                             <option key={cat} value={cat}>{cat}</option>
                                         ))}
+                                        <option value="other">Other</option>
                                     </select>
                                 </div>
                             </div>
@@ -249,12 +250,12 @@ export default function ExpensesPage() {
                                 )}
                             </div>
                         </form>
-                    </SummaryCard>
+                    </Card>
                 </div>
 
                 {/* Expenses List Section */}
-                <div className="flex-1 min-w-0">
-                    <SummaryCard title="Expense List">
+                <div className="flex-1 min-w-0 min-h-0">
+                    <Card title="Expense List" fill>
                         <div className="space-y-3 w-full overflow-y-auto max-h-full scrollbar-custom pr-2">
                             {filteredExpenseList.length > 0 ? (
                                 [...filteredExpenseList]
@@ -265,7 +266,7 @@ export default function ExpensesPage() {
                                             className="flex justify-between items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
                                         >
                                             <div className="flex-1">
-                                                <p className="font-medium text-gray-900">{expense.title}</p>
+                                                <p className="font-medium text-gray-900 dark:text-white group-hover:text-black">{expense.title}</p>
                                                 <div className="flex gap-4 text-xs text-gray-500 mt-1">
                                                     <span>{expense.category}</span>
                                                     <span>{expense.date}</span>
@@ -299,7 +300,7 @@ export default function ExpensesPage() {
                                 <p className="text-gray-400 text-center text-sm py-8">No expenses for {MONTHS[currentMonth]} {currentYear}</p>
                             )}
                         </div>
-                    </SummaryCard>
+                    </Card>
                 </div>
             </div>
         </main>

@@ -1,5 +1,4 @@
-import SummaryCard from '@/src/components/SummaryCard'
-import React from 'react'
+import Card from '@/src/components/Card'
 import { budgets } from '../lib/data'
 
 function Budgets() {
@@ -20,13 +19,13 @@ function Budgets() {
             <section className='grid grid-cols-4 gap-4 w-full'>
                 {budgets.map(budget =>
                     <div key={budget.id}>
-                        <SummaryCard title={budget.category}>
+                        <Card title={budget.category}>
                             <div className='w-full text-center mt-2'>
                                 <p className='text-2xl font-bold text-blue-400'>${budget.value}</p>
                                 <p className='text-xs text-gray-400 mt-1'>Budget allocation</p>
                             </div>
                             <button className='text-sm mt-4 text-gray-300 cursor-pointer px-3 py-1 rounded-md hover:text-white hover:bg-white/10 transition-colors duration-200 w-full'>Edit</button>
-                        </SummaryCard>
+                        </Card>
                     </div>
                 )}
             </section>

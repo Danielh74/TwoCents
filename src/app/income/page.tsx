@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useTransactions } from '../lib/useTransactions'
-import SummaryCard from '../../components/SummaryCard'
+import Card from '../../components/Card'
 import { MONTHS } from '../lib/utils'
 import { Transaction } from '../lib/definitions'
 
@@ -142,26 +142,26 @@ export default function IncomePage() {
     }
 
     return (
-        <main className="flex h-[calc(100vh-2rem)] flex-col gap-3 p-4">
-            <div className="flex justify-between items-center mb-2">
+        <main className="flex h-[calc(100vh-2rem)] flex-col gap-3 p-4 min-h-0">
+            <header className="flex justify-between items-center mb-2">
                 <h1 className="text-3xl font-bold">Income</h1>
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
+                <article className="flex items-center gap-4">
+                    <section className="flex items-center gap-2">
                         <button onClick={handlePreviousMonth} className="px-2 py-1 rounded hover:bg-gray-200">←</button>
                         <h2 className="text-lg font-semibold min-w-fit">{MONTHS[currentMonth]} {currentYear}</h2>
                         <button onClick={handleNextMonth} className="px-2 py-1 rounded hover:bg-gray-200">→</button>
-                    </div>
-                    <div className="text-right border-l border-gray-300 pl-4">
+                    </section>
+                    <section className="text-right border-l border-gray-300 pl-4">
                         <p className="text-gray-600">Total Income</p>
                         <p className="text-3xl font-bold text-green-500">${totalIncome.toFixed(2)}</p>
-                    </div>
-                </div>
-            </div>
+                    </section>
+                </article>
+            </header>
 
-            <div className="flex gap-4 h-full overflow-hidden">
+            <div className="flex flex-1 gap-4 min-h-0">
                 {/* Form Section */}
-                <div className="flex-1 min-w-0">
-                    <SummaryCard title={editingId ? "Edit Income" : "Add New Income"}>
+                <div className="flex-1 min-h-0">
+                    <Card title={editingId ? "Edit Income" : "Add New Income"}>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
@@ -246,12 +246,12 @@ export default function IncomePage() {
                                 )}
                             </div>
                         </form>
-                    </SummaryCard>
+                    </Card>
                 </div>
 
                 {/* Income List Section */}
-                <div className="flex-1 min-w-0">
-                    <SummaryCard title="Income List">
+                <div className="flex-1 min-w-0 min-h-0">
+                    <Card title="Income List" fill>
                         <div className="space-y-3 w-full h-full overflow-y-auto scrollbar-custom pr-2">
                             {filteredIncomeList.length > 0 ? (
                                 [...filteredIncomeList]
@@ -262,7 +262,7 @@ export default function IncomePage() {
                                             className="flex justify-between items-start p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors group"
                                         >
                                             <div className="flex-1">
-                                                <p className="font-medium text-gray-900">{income.title}</p>
+                                                <p className="font-medium text-gray-900 dark:text-white ">{income.title}</p>
                                                 <div className="flex gap-4 text-xs text-gray-500 mt-1">
                                                     <span>{income.category}</span>
                                                     <span>{income.date}</span>
@@ -296,7 +296,7 @@ export default function IncomePage() {
                                 <p className="text-gray-400 text-center text-sm py-8">No income records for {MONTHS[currentMonth]} {currentYear}</p>
                             )}
                         </div>
-                    </SummaryCard>
+                    </Card>
                 </div>
             </div>
         </main>

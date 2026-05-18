@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 function Sidebar() {
     return (
-        <nav className={`flex w-1/6 h-[calc(100vh-2rem)] mt-4 mb-4 ml-4 pt-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg fixed`}>
+        <nav className={`flex w-1/6 h-[calc(100vh-2rem)] mt-4 mb-4 ml-4 pt-8 bg-white/40 backdrop-blur-md rounded-2xl shadow-md dark:shadow-gray-600 fixed dark:bg-gray-700 dark:shadow-md black/30`}>
             <div className={`flex flex-col gap-8 ml-8 w-full items-start font-semibold text-lg`}>
                 <Link href='/'>Dashboard</Link>
                 <Link href='/income'>Income</Link>
