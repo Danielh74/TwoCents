@@ -22,13 +22,19 @@ export default function Dashboard() {
         });
     }, [currentMonth, currentYear, transactions]);
 
-    const { incomeAmount, expensesAmount } = useMemo(() => {
+    const { incomeAmount, expensesAmount, balance } = useMemo(() => {
         return filteredData.reduce(
             (acc, current) => {
-                if (current.type === 'expense') acc.expensesAmount += Number(current.amount);
-                if (current.type === 'income') acc.incomeAmount += Number(current.amount);
+                if (current.type === 'expense') {
+                    acc.expensesAmount += Number(current.amount);
+                    acc.balance -= Number(current.amount);
+                };
+                if (current.type === 'income') {
+                    acc.incomeAmount += Number(current.amount);
+                    acc.balance += Number(current.amount);
+                }
                 return acc;
-            }, { incomeAmount: 0, expensesAmount: 0 })
+            }, { incomeAmount: 0, expensesAmount: 0, balance: 0 })
     }, [filteredData]);
 
     const chartData = [
@@ -85,15 +91,25 @@ export default function Dashboard() {
                             <button onClick={handleNextMonth} className="px-2 py-1 rounded hover:bg-gray-200">→</button>
                         </div>
                         <div className={`flex flex-1 justify-center w-full overflow-y-auto scrollbar-custom pr-2`}>
-                            <div className="text-sm mb-4">
-                                <h1 className="text-xl text-blue-500">Income</h1>
-                                {filteredData.map(income => { return income.type === 'income' && <p key={income.id}>{income.title} - ${income.amount}</p> })}
+                            <div className='flex flex-col justify-start flex-1 gap-3'>
+                                <figure className="flex  justify-between">
+                                    <span>Total income this month:</span>
+                                    <span className='text-green-500 font-bold text-lg'>+{incomeAmount}</span>
+                                </figure>
+                                <figure className="flex justify-between">
+                                    <span>Total expenses this month:</span>
+                                    <span className='text-red-500 font-bold text-lg'>-{expensesAmount}</span>
+                                </figure>
+                                <figure className="flex justify-between">
+                                    <span>Total balance:</span>
+                                    <span className={`${balance > 0 ? "text-green-500" : "text-red-500"} font-bold text-lg`}>{balance > 0 ? '+' : '-'}{balance}</span>
+                                </figure>
                             </div>
-                            <RadialChart data={chartData} />
-                            <div className="text-sm mb-4">
-                                <h1 className="text-xl text-red-500">Expenses</h1>
-                                {filteredData.map(expense => { return expense.type === 'expense' && <p key={expense.id}>{expense.title} - ${expense.amount}</p> })}
+
+                            <div className='flex flex-2'>
+                                <RadialChart data={chartData} />
                             </div>
+
                         </div>
                     </div>
                 </Card>
