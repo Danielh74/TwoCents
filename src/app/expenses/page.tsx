@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useMemo, SubmitEvent } from 'react'
-import { budgets } from '../lib/data'
-import { useTransactions } from '../lib/useTransactions'
-import Card from '../../components/Card'
-import { MONTHS } from '../lib/utils'
-import { Transaction } from '../lib/definitions'
+import { budgets } from '@/lib/data'
+import { useTransactions } from '@/lib/useTransactions'
+import Card from '@/components/Card'
+import { MONTHS } from '@/lib/utils'
+import { Transaction } from '@/lib/definitions'
 
 interface ExpenseForm {
     title: string

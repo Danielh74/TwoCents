@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useTransactions } from '../lib/useTransactions'
+import { useTransactions } from '../../lib/useTransactions'
 import Card from '../../components/Card'
-import { MONTHS } from '../lib/utils'
-import { Transaction } from '../lib/definitions'
+import { MONTHS } from '../../lib/utils'
+import { Transaction } from '../../lib/definitions'
 
 interface IncomeForm {
     title: string

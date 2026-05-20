@@ -1,5 +1,5 @@
-import Card from '@/src/components/Card'
-import { budgets } from '../lib/data'
+import Card from '@/components/Card'
+import { budgets } from '@/lib/data'
 
 function Budgets() {
     return (
