@@ -19,7 +19,7 @@ interface ExpenseForm {
     notes: string
 }
 
-const EMPTY_FORM: ExpenseForm = {
+const initialForm: ExpenseForm = {
     title: '',
     amount: '',
     category: '',
@@ -36,7 +36,7 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
     const [editingId, setEditingId] = useState<string | null>(null)
-    const [formData, setFormData] = useState<ExpenseForm>(EMPTY_FORM)
+    const [formData, setFormData] = useState<ExpenseForm>(initialForm)
     const [isPending, startTransition] = useTransition()
 
     const filteredExpenseList = useMemo(() => {
@@ -71,7 +71,7 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
 
     const handleCancel = () => {
         setEditingId(null)
-        setFormData(EMPTY_FORM)
+        setFormData(initialForm)
     }
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -96,13 +96,13 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
                 const updated = await updateTransactionAction(editingId, data)
                 setTransactions(prev => prev.map(t => t._id === editingId ? updated : t))
                 setEditingId(null)
-                setFormData(EMPTY_FORM)
+                setFormData(initialForm)
             })
         } else {
             startTransition(async () => {
                 const created = await createTransactionData(data)
                 setTransactions(prev => [created, ...prev])
-                setFormData(EMPTY_FORM)
+                setFormData(initialForm)
             })
         }
     }
