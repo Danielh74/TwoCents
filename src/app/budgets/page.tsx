@@ -3,8 +3,6 @@ import { getBudgetsFromDb } from '@/lib/db/budgets'
 import { getCategoriesByTypeFromDb } from '@/lib/db/categories'
 import BudgetsClient from './BudgetsClient'
 
-export const dynamic = 'force-dynamic';
-
 export default function BudgetsPage() {
     const budgetsPromise = getBudgetsFromDb()
     const categoriesPromise = getCategoriesByTypeFromDb('expense')
