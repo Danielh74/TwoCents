@@ -3,6 +3,8 @@ import { getTransactionsFromDb } from '@/lib/db/transactions'
 import { getBudgetsFromDb } from '@/lib/db/budgets'
 import DashboardClient from './DashboardClient'
 
+export const dynamic = 'force-dynamic'
+
 export default function Dashboard() {
     const transactionsPromise = getTransactionsFromDb()
     const budgetsPromise = getBudgetsFromDb()
