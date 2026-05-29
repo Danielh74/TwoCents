@@ -25,7 +25,9 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
 
-    const t = useTranslations()
+    const t = useTranslations();
+    const { currency, showCents, language } = useSettings();
+    const cDec = showCents ? 2 : 0
 
     const filteredData = useMemo(() =>
         transactions.filter(tx => {
@@ -112,9 +114,6 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
         [filteredData]
     )
 
-    const { currency, showCents } = useSettings()
-    const cDec = showCents ? 2 : 0
-
     const handlePreviousMonth = () => {
         if (currentMonth === 0) {
             setCurrentMonth(11)
@@ -140,21 +139,11 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
                     <h1 className="text-2xl font-bold">{t.dashboard.title}</h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400">{t.dashboard.subtitle}</p>
                 </div>
-                <div className="flex items-center gap-2 bg-white dark:bg-gray-700 rounded-xl px-4 py-2 shadow-sm">
-                    <button
-                        onClick={handlePreviousMonth}
-                        className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-gray-500 dark:text-gray-300"
-                    >
-                        ←
-                    </button>
-                    <span className="text-sm font-semibold w-36 text-center">{t.months[currentMonth]} {currentYear}</span>
-                    <button
-                        onClick={handleNextMonth}
-                        className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-gray-500 dark:text-gray-300"
-                    >
-                        →
-                    </button>
-                </div>
+                <section className="flex items-center gap-2">
+                    <button onClick={handlePreviousMonth} className="px-2 py-1 rounded hover:bg-gray-200">{language === 'en' ? '←' : '→'}</button>
+                    <h2 className="text-lg font-semibold min-w-fit">{t.months[currentMonth]} {currentYear}</h2>
+                    <button onClick={handleNextMonth} className="px-2 py-1 rounded hover:bg-gray-200">{language === 'en' ? '→' : '←'}</button>
+                </section>
             </header>
 
             <section className="grid grid-cols-2 xl:grid-cols-4 gap-4 shrink-0">

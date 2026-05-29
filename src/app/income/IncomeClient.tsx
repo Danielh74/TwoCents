@@ -37,7 +37,7 @@ export default function IncomeClient({ transactionsPromise }: Props) {
     const [formData, setFormData] = useState<IncomeForm>(EMPTY_FORM)
     const [isPending, startTransition] = useTransition()
 
-    const { currency, showCents, dateFormat } = useSettings()
+    const { currency, showCents, dateFormat, language } = useSettings()
     const t = useTranslations()
     const cDec = showCents ? 2 : 0
 
@@ -133,9 +133,9 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                 <h1 className="text-3xl font-bold">{t.income.title}</h1>
                 <article className="flex items-center gap-4">
                     <section className="flex items-center gap-2">
-                        <button onClick={handlePreviousMonth} className="px-2 py-1 rounded hover:bg-gray-200">←</button>
+                        <button onClick={handlePreviousMonth} className="px-2 py-1 rounded hover:bg-gray-200">{language === 'en' ? '←' : '→'}</button>
                         <h2 className="text-lg font-semibold min-w-fit">{t.months[currentMonth]} {currentYear}</h2>
-                        <button onClick={handleNextMonth} className="px-2 py-1 rounded hover:bg-gray-200">→</button>
+                        <button onClick={handleNextMonth} className="px-2 py-1 rounded hover:bg-gray-200">{language === 'en' ? '→' : '←'}</button>
                     </section>
                     <section className="text-right border-s border-gray-300 ps-4">
                         <p className="text-gray-600">{t.income.totalIncome}</p>

@@ -42,7 +42,7 @@ export default function ExpensesClient({ transactionsPromise, budgetsPromise }: 
     const [formData, setFormData] = useState<ExpenseForm>(initialForm)
     const [isPending, startTransition] = useTransition()
 
-    const { currency, showCents, dateFormat } = useSettings()
+    const { currency, showCents, dateFormat, language } = useSettings()
     const t = useTranslations()
     const cDec = showCents ? 2 : 0
 
@@ -134,20 +134,20 @@ export default function ExpensesClient({ transactionsPromise, budgetsPromise }: 
 
     return (
         <main className="flex md:h-[calc(100vh-2rem)] flex-col gap-3 md:min-h-0">
-            <div className="flex flex-wrap justify-between items-center mb-2 gap-3">
+            <header className="flex flex-wrap justify-between items-center mb-2 gap-3">
                 <h1 className="text-3xl font-bold">{t.expenses.title}</h1>
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <button onClick={handlePreviousMonth} className="px-2 py-1 rounded hover:bg-gray-200">←</button>
+                <article className="flex items-center gap-4">
+                    <section className="flex items-center gap-2">
+                        <button onClick={handlePreviousMonth} className="px-2 py-1 rounded hover:bg-gray-200">{language === 'en' ? '←' : '→'}</button>
                         <h2 className="text-lg font-semibold min-w-fit">{t.months[currentMonth]} {currentYear}</h2>
-                        <button onClick={handleNextMonth} className="px-2 py-1 rounded hover:bg-gray-200">→</button>
-                    </div>
-                    <div className="text-right border-s border-gray-300 ps-4">
+                        <button onClick={handleNextMonth} className="px-2 py-1 rounded hover:bg-gray-200">{language === 'en' ? '→' : '←'}</button>
+                    </section>
+                    <section className="text-right border-s border-gray-300 ps-4">
                         <p className="text-gray-600">{t.expenses.totalExpenses}</p>
                         <p className="text-3xl font-bold text-red-500">{currency}{totalExpenses.toFixed(cDec)}</p>
-                    </div>
-                </div>
-            </div>
+                    </section>
+                </article>
+            </header>
 
             <div className="flex flex-col lg:flex-row gap-4 lg:h-full overflow-auto lg:overflow-hidden">
                 <div className="flex flex-1 gap-4 lg:min-h-0">

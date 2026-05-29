@@ -19,7 +19,7 @@ function TransactionsList({ transactionsPromise }: Props) {
     const [transactions, setTransactions] = useState(initialTransactions)
     const [isPending, startTransition] = useTransition()
 
-    const { currency, showCents, dateFormat } = useSettings()
+    const { currency, showCents, dateFormat, language } = useSettings()
     const t = useTranslations()
     const cDec = showCents ? 2 : 0
 
@@ -106,11 +106,11 @@ function TransactionsList({ transactionsPromise }: Props) {
         <main className="flex md:h-[calc(100vh-2rem)] flex-col gap-3 p-4 md:min-h-0">
             <div className="flex flex-wrap justify-between items-center mb-2 gap-3">
                 <h1 className="text-3xl font-bold">{t.transactions.title}</h1>
-                <div className="flex items-center gap-2">
-                    <button onClick={handlePreviousMonth} className="px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">←</button>
+                <section className="flex items-center gap-2">
+                    <button onClick={handlePreviousMonth} className="px-2 py-1 rounded hover:bg-gray-200">{language === 'en' ? '←' : '→'}</button>
                     <h2 className="text-lg font-semibold min-w-fit">{t.months[currentMonth]} {currentYear}</h2>
-                    <button onClick={handleNextMonth} className="px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">→</button>
-                </div>
+                    <button onClick={handleNextMonth} className="px-2 py-1 rounded hover:bg-gray-200">{language === 'en' ? '→' : '←'}</button>
+                </section>
                 <div className="flex text-center gap-4 border border-gray-300 dark:border-gray-600 px-4 py-1 rounded-lg">
                     <div>
                         <p className="text-xs text-gray-500">{t.transactions.income}</p>
