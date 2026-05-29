@@ -2,14 +2,15 @@
 
 import { use, useMemo, useState, useTransition } from 'react'
 import Card from '@/components/Card'
-import { budgets } from '@/lib/data'
 import { useSettings, formatDate } from '@/lib/settings-context'
 import { useTranslations } from '@/lib/translations'
-import type { Transaction, CreateTransactionInput } from '@/types/transaction'
+import type { Transaction, CreateTransactionInput } from '@/types/transaction';
+import type { Budget, CreateBudgetInput } from '@/types/budget'
 import { createTransactionData, updateTransactionAction, deleteTransactionAction } from '@/app/transactions/actions'
 
 type Props = {
-    transactionsPromise: Promise<Transaction[]>
+    transactionsPromise: Promise<Transaction[]>;
+    budgetsPromise: Promise<Budget[]>;
 }
 
 interface ExpenseForm {
@@ -28,10 +29,11 @@ const initialForm: ExpenseForm = {
     notes: '',
 }
 
-const EXPENSE_CATEGORIES = budgets.map(b => b.category).sort()
+export default function ExpensesClient({ transactionsPromise, budgetsPromise }: Props) {
+    const initialTransactions = use(transactionsPromise);
+    const budgets = use(budgetsPromise);
 
-export default function ExpensesClient({ transactionsPromise }: Props) {
-    const initialTransactions = use(transactionsPromise)
+    const EXPENSE_CATEGORIES = budgets.map(b => b.category).sort()
 
     const [transactions, setTransactions] = useState(initialTransactions)
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())

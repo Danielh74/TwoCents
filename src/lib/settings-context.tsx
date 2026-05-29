@@ -28,19 +28,24 @@ const DEFAULTS: Settings = {
 const SettingsContext = createContext<SettingsContextType>({
     ...DEFAULTS,
     language: 'en',
-    updateSettings: () => {},
+    updateSettings: () => { },
 })
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const [settings, setSettings] = useState<Settings>(DEFAULTS)
 
     useEffect(() => {
-        const stored = localStorage.getItem('twocents-settings')
-        if (stored) {
-            try {
-                setSettings({ ...DEFAULTS, ...JSON.parse(stored) })
-            } catch {}
-        }
+        function fetchSettings() {
+            const stored = localStorage.getItem('twocents-settings')
+            if (stored) {
+                try {
+                    setSettings({ ...DEFAULTS, ...JSON.parse(stored) })
+                } catch { }
+            }
+        };
+
+        fetchSettings();
+
     }, [])
 
     const updateSettings = (partial: Partial<Settings>) => {
