@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useTheme } from 'next-themes'
 import { useSettings } from '@/lib/settings-context'
+import { useTranslations } from '@/lib/translations'
 import Card from '@/components/Card'
-import type { DateFormat } from '@/lib/settings-context'
+import type { DateFormat, Language } from '@/lib/settings-context'
 
 const CURRENCIES = [
     { symbol: '$', label: '$ – US Dollar' },
@@ -50,7 +51,8 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (val: boole
 
 export default function Settings() {
     const { theme, setTheme } = useTheme()
-    const { currency, dateFormat, budgetWarningThreshold, showCents, updateSettings } = useSettings()
+    const { currency, dateFormat, budgetWarningThreshold, showCents, language, updateSettings } = useSettings()
+    const t = useTranslations()
     const [saved, setSaved] = useState(false)
 
     const handleChange = (partial: Parameters<typeof updateSettings>[0]) => {
@@ -63,30 +65,41 @@ export default function Settings() {
         <div className="flex flex-col gap-6 p-6 h-full">
             <header className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold">Settings</h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Customize your TwoCents experience</p>
+                    <h1 className="text-2xl font-bold">{t.settings.title}</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t.settings.subtitle}</p>
                 </div>
                 <span className={`text-sm font-medium text-green-500 transition-opacity duration-300 ${saved ? 'opacity-100' : 'opacity-0'}`}>
-                    ✓ Saved
+                    {t.settings.saved}
                 </span>
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card title="Appearance">
+                <Card title={t.settings.appearance}>
                     <div className="divide-y divide-gray-100 dark:divide-gray-600">
-                        <SettingRow label="Theme" description="Choose your preferred color scheme">
+                        <SettingRow label={t.settings.theme} description={t.settings.themeDesc}>
                             <select value={theme} onChange={e => setTheme(e.target.value)} className={selectCls}>
-                                <option value="system">System default</option>
-                                <option value="light">Light</option>
-                                <option value="dark">Dark</option>
+                                <option value="system">{t.settings.systemDefault}</option>
+                                <option value="light">{t.settings.light}</option>
+                                <option value="dark">{t.settings.dark}</option>
                             </select>
                         </SettingRow>
+                        <SettingRow label={t.settings.language} description={t.settings.languageDesc}>
+                            <select
+                                value={language}
+                                onChange={e => handleChange({ language: e.target.value as Language })}
+                                className={selectCls}
+                            >
+                                <option value="en">{t.settings.english}</option>
+                                <option value="he">{t.settings.hebrew}</option>
+                            </select>
+                        </SettingRow>
+
                     </div>
                 </Card>
 
-                <Card title="Date & Time">
+                <Card title={t.settings.dateTime}>
                     <div className="divide-y divide-gray-100 dark:divide-gray-600">
-                        <SettingRow label="Date Format" description="How dates appear throughout the app">
+                        <SettingRow label={t.settings.dateFormat} description={t.settings.dateFormatDesc}>
                             <select
                                 value={dateFormat}
                                 onChange={e => handleChange({ dateFormat: e.target.value as DateFormat })}
@@ -100,9 +113,9 @@ export default function Settings() {
                     </div>
                 </Card>
 
-                <Card title="Currency & Numbers">
+                <Card title={t.settings.currencyNumbers}>
                     <div className="divide-y divide-gray-100 dark:divide-gray-600">
-                        <SettingRow label="Currency Symbol" description="Symbol displayed next to all monetary values">
+                        <SettingRow label={t.settings.currencySymbol} description={t.settings.currencySymbolDesc}>
                             <select
                                 value={currency}
                                 onChange={e => handleChange({ currency: e.target.value })}
@@ -113,17 +126,17 @@ export default function Settings() {
                                 ))}
                             </select>
                         </SettingRow>
-                        <SettingRow label="Show Cents" description="Display decimal places on monetary amounts">
+                        <SettingRow label={t.settings.showCents} description={t.settings.showCentsDesc}>
                             <Toggle checked={showCents} onChange={val => handleChange({ showCents: val })} />
                         </SettingRow>
                     </div>
                 </Card>
 
-                <Card title="Budgets" fill>
+                <Card title={t.settings.budgets} fill>
                     <div className="h-full flex flex-col justify-center">
                         <SettingRow
-                            label="Warning Threshold"
-                            description="Progress bars turn red when spending exceeds this % of the budget"
+                            label={t.settings.warningThreshold}
+                            description={t.settings.warningThresholdDesc}
                         >
                             <div className="flex items-center gap-3">
                                 <input

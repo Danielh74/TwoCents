@@ -5,12 +5,13 @@ import Card from "@/components/Card"
 import RadialChart from "@/components/RadialChart"
 import ProgressBar from '@/components/ProgressBar'
 import TransactionInfo from '@/components/TransactionInfo'
-import { fmt, MONTHS } from '@/lib/utils'
+import { fmt } from '@/lib/utils'
 import { BudgetIcon, ExpenseIcon, IncomeIcon, SavingsIcon } from '@/components/Icons'
 import type { Transaction } from '@/types/transaction'
 import type { Budget } from '@/types/budget'
 import StatCard from '@/components/StatCard'
 import { useSettings } from '@/lib/settings-context'
+import { useTranslations } from '@/lib/translations'
 
 type Props = {
     transactionsPromise: Promise<Transaction[]>
@@ -24,9 +25,11 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
 
+    const t = useTranslations()
+
     const filteredData = useMemo(() =>
-        transactions.filter(t => {
-            const [year, month] = t.date.split('-').map(Number)
+        transactions.filter(tx => {
+            const [year, month] = tx.date.split('-').map(Number)
             return year === currentYear && month === currentMonth + 1
         }),
         [currentMonth, currentYear, transactions]
@@ -34,13 +37,13 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
 
     const { incomeAmount, expensesAmount, balance } = useMemo(() =>
         filteredData.reduce(
-            (acc, t) => {
-                if (t.type === 'expense') {
-                    acc.expensesAmount += t.amount
-                    acc.balance -= t.amount
+            (acc, tx) => {
+                if (tx.type === 'expense') {
+                    acc.expensesAmount += tx.amount
+                    acc.balance -= tx.amount
                 } else {
-                    acc.incomeAmount += t.amount
-                    acc.balance += t.amount
+                    acc.incomeAmount += tx.amount
+                    acc.balance += tx.amount
                 }
                 return acc
             },
@@ -54,14 +57,14 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
 
     const prevMonthData = useMemo(() =>
         transactions
-            .filter(t => {
-                const [year, month] = t.date.split('-').map(Number)
+            .filter(tx => {
+                const [year, month] = tx.date.split('-').map(Number)
                 return year === prevYear && month === prevMonth + 1
             })
             .reduce(
-                (acc, t) => {
-                    if (t.type === 'expense') acc.expenses += t.amount
-                    else acc.income += t.amount
+                (acc, tx) => {
+                    if (tx.type === 'expense') acc.expenses += tx.amount
+                    else acc.income += tx.amount
                     return acc
                 },
                 { income: 0, expenses: 0 }
@@ -72,19 +75,19 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
     const savingsRate = incomeAmount > 0 ? ((incomeAmount - expensesAmount) / incomeAmount) * 100 : 0
 
     const chartData = [
-        { name: 'Income', value: incomeAmount },
-        { name: 'Expenses', value: expensesAmount },
+        { name: t.dashboard.income, value: incomeAmount },
+        { name: t.dashboard.expenses, value: expensesAmount },
     ]
 
     const monthlyExpenses = useMemo(() =>
         budgets
             .map(budget => {
                 const totalExpense = transactions
-                    .filter(t => {
-                        const [year, month] = t.date.split('-').map(Number)
-                        return t.type === 'expense' && t.category === budget.category && year === currentYear && month === currentMonth + 1
+                    .filter(tx => {
+                        const [year, month] = tx.date.split('-').map(Number)
+                        return tx.type === 'expense' && tx.category === budget.category && year === currentYear && month === currentMonth + 1
                     })
-                    .reduce((sum, t) => sum + t.amount, 0)
+                    .reduce((sum, tx) => sum + tx.amount, 0)
                 return {
                     category: budget.category,
                     budget: budget.value,
@@ -98,8 +101,8 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
 
     const topCategories = useMemo(() => {
         const map: Record<string, number> = {}
-        filteredData.filter(t => t.type === 'expense').forEach(t => {
-            map[t.category] = (map[t.category] || 0) + t.amount
+        filteredData.filter(tx => tx.type === 'expense').forEach(tx => {
+            map[tx.category] = (map[tx.category] || 0) + tx.amount
         })
         return Object.entries(map).sort(([, a], [, b]) => b - a).slice(0, 3)
     }, [filteredData])
@@ -134,8 +137,8 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
         <main className="flex flex-col gap-4 md:h-[calc(100vh-2rem)] md:min-h-0">
             <header className="flex justify-between items-center shrink-0 pt-1">
                 <div>
-                    <h1 className="text-2xl font-bold">Dashboard</h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Your financial overview</p>
+                    <h1 className="text-2xl font-bold">{t.dashboard.title}</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t.dashboard.subtitle}</p>
                 </div>
                 <div className="flex items-center gap-2 bg-white dark:bg-gray-700 rounded-xl px-4 py-2 shadow-sm">
                     <button
@@ -144,7 +147,7 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
                     >
                         ←
                     </button>
-                    <span className="text-sm font-semibold w-36 text-center">{MONTHS[currentMonth]} {currentYear}</span>
+                    <span className="text-sm font-semibold w-36 text-center">{t.months[currentMonth]} {currentYear}</span>
                     <button
                         onClick={handleNextMonth}
                         className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-gray-500 dark:text-gray-300"
@@ -156,34 +159,34 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
 
             <section className="grid grid-cols-2 xl:grid-cols-4 gap-4 shrink-0">
                 <StatCard
-                    label="Net Balance"
+                    label={t.dashboard.netBalance}
                     value={balance}
                     prefix={balance >= 0 ? `+${currency}` : `-${currency}`}
                     decimals={cDec}
                     color={balance >= 0 ? 'blue' : 'red'}
                     icon={<BudgetIcon />}
-                    subtext={`${filteredData.length} transaction${filteredData.length !== 1 ? 's' : ''} this month`}
+                    subtext={t.dashboard.transactionsThisMonth(filteredData.length)}
                 />
                 <StatCard
-                    label="Income"
+                    label={t.dashboard.income}
                     value={incomeAmount}
                     prefix={currency}
                     decimals={cDec}
                     color="green"
                     icon={<IncomeIcon />}
-                    subtext={prevMonthData.income > 0 ? `vs ${currency}${fmt(prevMonthData.income, cDec)} last month` : undefined}
+                    subtext={prevMonthData.income > 0 ? t.dashboard.vsLastMonth(`${currency}${fmt(prevMonthData.income, cDec)}`) : undefined}
                 />
                 <StatCard
-                    label="Expenses"
+                    label={t.dashboard.expenses}
                     value={expensesAmount}
                     prefix={currency}
                     decimals={cDec}
                     color="red"
                     icon={<ExpenseIcon />}
-                    subtext={prevMonthData.expenses > 0 ? `vs ${currency}${fmt(prevMonthData.expenses, cDec)} last month` : undefined}
+                    subtext={prevMonthData.expenses > 0 ? t.dashboard.vsLastMonth(`${currency}${fmt(prevMonthData.expenses, cDec)}`) : undefined}
                 />
                 <StatCard
-                    label="Savings Rate"
+                    label={t.dashboard.savingsRate}
                     value={savingsRate}
                     prefix={savingsRate < 0 ? '-' : ''}
                     suffix="%"
@@ -192,23 +195,23 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
                     icon={<SavingsIcon />}
                     subtext={
                         incomeAmount === 0
-                            ? 'No income recorded'
+                            ? t.dashboard.noIncome
                             : savingsRate >= 20
-                                ? 'On track'
+                                ? t.dashboard.onTrack
                                 : savingsRate >= 0
-                                    ? 'Below 20% target'
-                                    : 'Spending exceeds income'
+                                    ? t.dashboard.belowTarget
+                                    : t.dashboard.exceedsIncome
                     }
                 />
             </section>
 
             <section className="flex flex-col lg:flex-row gap-4 lg:flex-1 lg:min-h-0">
-                <Card title="Breakdown" fill>
+                <Card title={t.dashboard.breakdown} fill>
                     <div className="flex flex-col h-full overflow-y-auto scrollbar-custom pr-1">
                         <RadialChart data={chartData} />
                         {topCategories.length > 0 && (
                             <div className="mt-3 border-t border-gray-100 dark:border-gray-600 pt-3">
-                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Top Spending</p>
+                                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{t.dashboard.topSpending}</p>
                                 <div className="space-y-2">
                                     {topCategories.map(([category, amount]) => (
                                         <div key={category} className="flex justify-between items-center text-sm">
@@ -222,7 +225,7 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
                     </div>
                 </Card>
 
-                <Card title="Budget Health" fill>
+                <Card title={t.dashboard.budgetHealth} fill>
                     <div className="space-y-4 w-full h-full overflow-y-auto scrollbar-custom pr-2">
                         {monthlyExpenses.length > 0 ? (
                             monthlyExpenses.map(budget =>
@@ -235,25 +238,25 @@ export default function DashboardClient({ transactionsPromise, budgetsPromise }:
                                 />
                             )
                         ) : (
-                            <p className="text-gray-400 text-center text-sm">No budgets set</p>
+                            <p className="text-gray-400 text-center text-sm">{t.dashboard.noBudgets}</p>
                         )}
                     </div>
                 </Card>
 
-                <Card title="Recent Transactions" fill>
+                <Card title={t.dashboard.recentTransactions} fill>
                     <div className="space-y-3 w-full h-full overflow-y-auto scrollbar-custom pr-2">
                         {sortedTransactions.length > 0 ? (
-                            sortedTransactions.map(t =>
+                            sortedTransactions.map(tx =>
                                 <TransactionInfo
-                                    key={t._id}
-                                    amount={t.amount}
-                                    date={t.date}
-                                    title={t.title}
-                                    type={t.type}
+                                    key={tx._id}
+                                    amount={tx.amount}
+                                    date={tx.date}
+                                    title={tx.title}
+                                    type={tx.type}
                                 />
                             )
                         ) : (
-                            <p className="text-gray-400 text-center text-sm">No transactions this month</p>
+                            <p className="text-gray-400 text-center text-sm">{t.dashboard.noTransactions}</p>
                         )}
                     </div>
                 </Card>

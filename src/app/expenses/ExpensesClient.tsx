@@ -3,8 +3,8 @@
 import { use, useMemo, useState, useTransition } from 'react'
 import Card from '@/components/Card'
 import { budgets } from '@/lib/data'
-import { MONTHS } from '@/lib/utils'
 import { useSettings, formatDate } from '@/lib/settings-context'
+import { useTranslations } from '@/lib/translations'
 import type { Transaction, CreateTransactionInput } from '@/types/transaction'
 import { createTransactionData, updateTransactionAction, deleteTransactionAction } from '@/app/transactions/actions'
 
@@ -41,19 +41,20 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
     const [isPending, startTransition] = useTransition()
 
     const { currency, showCents, dateFormat } = useSettings()
+    const t = useTranslations()
     const cDec = showCents ? 2 : 0
 
     const filteredExpenseList = useMemo(() => {
         return transactions
-            .filter(t => t.type === 'expense')
-            .filter(t => {
-                const [year, month] = t.date.split('-').map(Number)
+            .filter(tx => tx.type === 'expense')
+            .filter(tx => {
+                const [year, month] = tx.date.split('-').map(Number)
                 return year === currentYear && month === currentMonth + 1
             })
     }, [transactions, currentMonth, currentYear])
 
     const totalExpenses = useMemo(
-        () => filteredExpenseList.reduce((sum, t) => sum + t.amount, 0),
+        () => filteredExpenseList.reduce((sum, tx) => sum + tx.amount, 0),
         [filteredExpenseList]
     )
 
@@ -82,7 +83,7 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
         e.preventDefault()
 
         if (!formData.title || !formData.amount || !formData.category || !formData.date) {
-            alert('Please fill in all required fields')
+            alert(t.expenses.fillRequired)
             return
         }
 
@@ -98,7 +99,7 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
         if (editingId !== null) {
             startTransition(async () => {
                 const updated = await updateTransactionAction(editingId, data)
-                setTransactions(prev => prev.map(t => t._id === editingId ? updated : t))
+                setTransactions(prev => prev.map(tx => tx._id === editingId ? updated : tx))
                 setEditingId(null)
                 setFormData(initialForm)
             })
@@ -112,10 +113,10 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
     }
 
     const handleDelete = (id: string) => {
-        if (!confirm('Are you sure you want to delete this expense?')) return
+        if (!confirm(t.expenses.confirmDelete)) return
         startTransition(async () => {
             await deleteTransactionAction(id)
-            setTransactions(prev => prev.filter(t => t._id !== id))
+            setTransactions(prev => prev.filter(tx => tx._id !== id))
         })
     }
 
@@ -132,15 +133,15 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
     return (
         <main className="flex md:h-[calc(100vh-2rem)] flex-col gap-3 md:min-h-0">
             <div className="flex flex-wrap justify-between items-center mb-2 gap-3">
-                <h1 className="text-3xl font-bold">Expenses</h1>
+                <h1 className="text-3xl font-bold">{t.expenses.title}</h1>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                         <button onClick={handlePreviousMonth} className="px-2 py-1 rounded hover:bg-gray-200">←</button>
-                        <h2 className="text-lg font-semibold min-w-fit">{MONTHS[currentMonth]} {currentYear}</h2>
+                        <h2 className="text-lg font-semibold min-w-fit">{t.months[currentMonth]} {currentYear}</h2>
                         <button onClick={handleNextMonth} className="px-2 py-1 rounded hover:bg-gray-200">→</button>
                     </div>
-                    <div className="text-right border-l border-gray-300 pl-4">
-                        <p className="text-gray-600">Total Expenses</p>
+                    <div className="text-right border-s border-gray-300 ps-4">
+                        <p className="text-gray-600">{t.expenses.totalExpenses}</p>
                         <p className="text-3xl font-bold text-red-500">{currency}{totalExpenses.toFixed(cDec)}</p>
                     </div>
                 </div>
@@ -148,23 +149,23 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
 
             <div className="flex flex-col lg:flex-row gap-4 lg:h-full overflow-auto lg:overflow-hidden">
                 <div className="flex flex-1 gap-4 lg:min-h-0">
-                    <Card title={editingId ? "Edit Expense" : "Add New Expense"}>
+                    <Card title={editingId ? t.expenses.editTitle : t.expenses.addNew}>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t.expenses.titleField}</label>
                                 <input
                                     type="text"
                                     name="title"
                                     value={formData.title}
                                     onChange={handleInputChange}
-                                    placeholder="e.g., Groceries"
+                                    placeholder={t.expenses.placeholderTitle}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Amount *</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">{t.expenses.amount}</label>
                                     <input
                                         type="number"
                                         name="amount"
@@ -177,24 +178,24 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">{t.expenses.category}</label>
                                     <select
                                         name="category"
                                         value={formData.category}
                                         onChange={handleInputChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value="">Select category</option>
+                                        <option value="">{t.expenses.selectCategory}</option>
                                         {EXPENSE_CATEGORIES.map(cat => (
                                             <option key={cat} value={cat}>{cat}</option>
                                         ))}
-                                        <option value="Other">Other</option>
+                                        <option value="Other">{t.expenses.other}</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t.expenses.date}</label>
                                 <input
                                     type="date"
                                     name="date"
@@ -205,12 +206,12 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t.expenses.notes}</label>
                                 <textarea
                                     name="notes"
                                     value={formData.notes}
                                     onChange={handleInputChange}
-                                    placeholder="Add any additional notes..."
+                                    placeholder={t.expenses.placeholderNotes}
                                     rows={3}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                                 />
@@ -222,7 +223,7 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
                                     disabled={isPending}
                                     className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50"
                                 >
-                                    {editingId ? 'Update Expense' : 'Add Expense'}
+                                    {editingId ? t.expenses.updateBtn : t.expenses.addBtn}
                                 </button>
                                 {editingId && (
                                     <button
@@ -230,7 +231,7 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
                                         onClick={handleCancel}
                                         className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded-md transition-colors"
                                     >
-                                        Cancel
+                                        {t.expenses.cancelBtn}
                                     </button>
                                 )}
                             </div>
@@ -239,7 +240,7 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
                 </div>
 
                 <div className="flex-1 min-w-0 lg:min-h-0">
-                    <Card title="Expense List" fill>
+                    <Card title={t.expenses.expenseList} fill>
                         <div className="space-y-3 w-full overflow-y-auto max-h-96 lg:max-h-full scrollbar-custom pr-2">
                             {filteredExpenseList.length > 0 ? (
                                 [...filteredExpenseList]
@@ -257,7 +258,7 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
                                                 </div>
                                                 {expense.notes && <p className="text-xs text-gray-400 mt-2 italic">{expense.notes}</p>}
                                             </div>
-                                            <div className="flex gap-2 ml-4 items-center">
+                                            <div className="flex gap-2 ms-4 items-center">
                                                 <span className="text-lg font-bold text-red-500 min-w-fit">
                                                     -{currency}{expense.amount.toFixed(cDec)}
                                                 </span>
@@ -267,21 +268,21 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
                                                         disabled={isPending}
                                                         className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded transition-colors disabled:opacity-50"
                                                     >
-                                                        Edit
+                                                        {t.expenses.editBtn}
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(expense._id)}
                                                         disabled={isPending}
                                                         className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded transition-colors disabled:opacity-50"
                                                     >
-                                                        Delete
+                                                        {t.expenses.deleteBtn}
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
                                     ))
                             ) : (
-                                <p className="text-gray-400 text-center text-sm py-8">No expenses for {MONTHS[currentMonth]} {currentYear}</p>
+                                <p className="text-gray-400 text-center text-sm py-8">{t.expenses.noExpensesFor(t.months[currentMonth], currentYear)}</p>
                             )}
                         </div>
                     </Card>

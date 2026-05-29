@@ -3,12 +3,14 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
 export type DateFormat = 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY-MM-DD'
+export type Language = 'en' | 'he'
 
 export interface Settings {
     currency: string
     dateFormat: DateFormat
     budgetWarningThreshold: number
     showCents: boolean
+    language: Language
 }
 
 interface SettingsContextType extends Settings {
@@ -20,10 +22,12 @@ const DEFAULTS: Settings = {
     dateFormat: 'MM/DD/YYYY',
     budgetWarningThreshold: 80,
     showCents: true,
+    language: 'en',
 }
 
 const SettingsContext = createContext<SettingsContextType>({
     ...DEFAULTS,
+    language: 'en',
     updateSettings: () => {},
 })
 

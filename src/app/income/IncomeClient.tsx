@@ -2,8 +2,8 @@
 
 import { use, useMemo, useState, useTransition } from 'react'
 import Card from '@/components/Card'
-import { MONTHS } from '@/lib/utils'
 import { useSettings, formatDate } from '@/lib/settings-context'
+import { useTranslations } from '@/lib/translations'
 import type { Transaction, CreateTransactionInput } from '@/types/transaction'
 import { createTransactionData, updateTransactionAction, deleteTransactionAction } from '@/app/transactions/actions'
 
@@ -27,8 +27,6 @@ const EMPTY_FORM: IncomeForm = {
     notes: '',
 }
 
-const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Rent', 'Investment', 'Business', 'Other']
-
 export default function IncomeClient({ transactionsPromise }: Props) {
     const initialTransactions = use(transactionsPromise)
 
@@ -40,19 +38,20 @@ export default function IncomeClient({ transactionsPromise }: Props) {
     const [isPending, startTransition] = useTransition()
 
     const { currency, showCents, dateFormat } = useSettings()
+    const t = useTranslations()
     const cDec = showCents ? 2 : 0
 
     const filteredIncomeList = useMemo(() => {
         return transactions
-            .filter(t => t.type === 'income')
-            .filter(t => {
-                const [year, month] = t.date.split('-').map(Number)
+            .filter(tx => tx.type === 'income')
+            .filter(tx => {
+                const [year, month] = tx.date.split('-').map(Number)
                 return year === currentYear && month === currentMonth + 1
             })
     }, [transactions, currentMonth, currentYear])
 
     const totalIncome = useMemo(
-        () => filteredIncomeList.reduce((sum, t) => sum + t.amount, 0),
+        () => filteredIncomeList.reduce((sum, tx) => sum + tx.amount, 0),
         [filteredIncomeList]
     )
 
@@ -81,7 +80,7 @@ export default function IncomeClient({ transactionsPromise }: Props) {
         e.preventDefault()
 
         if (!formData.title || !formData.amount || !formData.category || !formData.date) {
-            alert('Please fill in all required fields')
+            alert(t.income.fillRequired)
             return
         }
 
@@ -97,7 +96,7 @@ export default function IncomeClient({ transactionsPromise }: Props) {
         if (editingId !== null) {
             startTransition(async () => {
                 const updated = await updateTransactionAction(editingId, data)
-                setTransactions(prev => prev.map(t => t._id === editingId ? updated : t))
+                setTransactions(prev => prev.map(tx => tx._id === editingId ? updated : tx))
                 setEditingId(null)
                 setFormData(EMPTY_FORM)
             })
@@ -111,10 +110,10 @@ export default function IncomeClient({ transactionsPromise }: Props) {
     }
 
     const handleDelete = (id: string) => {
-        if (!confirm('Are you sure you want to delete this income?')) return
+        if (!confirm(t.income.confirmDelete)) return
         startTransition(async () => {
             await deleteTransactionAction(id)
-            setTransactions(prev => prev.filter(t => t._id !== id))
+            setTransactions(prev => prev.filter(tx => tx._id !== id))
         })
     }
 
@@ -131,15 +130,15 @@ export default function IncomeClient({ transactionsPromise }: Props) {
     return (
         <main className="flex md:h-[calc(100vh-2rem)] flex-col gap-3 p-4 md:min-h-0">
             <header className="flex flex-wrap justify-between items-center mb-2 gap-3">
-                <h1 className="text-3xl font-bold">Income</h1>
+                <h1 className="text-3xl font-bold">{t.income.title}</h1>
                 <article className="flex items-center gap-4">
                     <section className="flex items-center gap-2">
                         <button onClick={handlePreviousMonth} className="px-2 py-1 rounded hover:bg-gray-200">←</button>
-                        <h2 className="text-lg font-semibold min-w-fit">{MONTHS[currentMonth]} {currentYear}</h2>
+                        <h2 className="text-lg font-semibold min-w-fit">{t.months[currentMonth]} {currentYear}</h2>
                         <button onClick={handleNextMonth} className="px-2 py-1 rounded hover:bg-gray-200">→</button>
                     </section>
-                    <section className="text-right border-l border-gray-300 pl-4">
-                        <p className="text-gray-600">Total Income</p>
+                    <section className="text-right border-s border-gray-300 ps-4">
+                        <p className="text-gray-600">{t.income.totalIncome}</p>
                         <p className="text-3xl font-bold text-green-500">{currency}{totalIncome.toFixed(cDec)}</p>
                     </section>
                 </article>
@@ -147,23 +146,23 @@ export default function IncomeClient({ transactionsPromise }: Props) {
 
             <div className="flex flex-col lg:flex-row flex-1 gap-4 lg:min-h-0 overflow-auto lg:overflow-hidden">
                 <div className="flex-1 lg:min-h-0">
-                    <Card title={editingId ? "Edit Income" : "Add New Income"}>
+                    <Card title={editingId ? t.income.editTitle : t.income.addNew}>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t.income.titleField}</label>
                                 <input
                                     type="text"
                                     name="title"
                                     value={formData.title}
                                     onChange={handleInputChange}
-                                    placeholder="e.g., Monthly Salary"
+                                    placeholder={t.income.placeholderTitle}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Amount *</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">{t.income.amount}</label>
                                     <input
                                         type="number"
                                         name="amount"
@@ -176,15 +175,15 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">{t.income.category}</label>
                                     <select
                                         name="category"
                                         value={formData.category}
                                         onChange={handleInputChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
-                                        <option value="">Select category</option>
-                                        {INCOME_CATEGORIES.map(cat => (
+                                        <option value="">{t.income.selectCategory}</option>
+                                        {t.income.categories.map(cat => (
                                             <option key={cat} value={cat}>{cat}</option>
                                         ))}
                                     </select>
@@ -192,7 +191,7 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t.income.date}</label>
                                 <input
                                     type="date"
                                     name="date"
@@ -203,12 +202,12 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t.income.notes}</label>
                                 <textarea
                                     name="notes"
                                     value={formData.notes}
                                     onChange={handleInputChange}
-                                    placeholder="Add any additional notes..."
+                                    placeholder={t.income.placeholderNotes}
                                     rows={3}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                                 />
@@ -220,7 +219,7 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                                     disabled={isPending}
                                     className="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50"
                                 >
-                                    {editingId ? 'Update Income' : 'Add Income'}
+                                    {editingId ? t.income.updateBtn : t.income.addBtn}
                                 </button>
                                 {editingId && (
                                     <button
@@ -228,7 +227,7 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                                         onClick={handleCancel}
                                         className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-medium py-2 px-4 rounded-md transition-colors"
                                     >
-                                        Cancel
+                                        {t.income.cancelBtn}
                                     </button>
                                 )}
                             </div>
@@ -237,7 +236,7 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                 </div>
 
                 <div className="flex-1 min-w-0 lg:min-h-0">
-                    <Card title="Income List" fill>
+                    <Card title={t.income.incomeList} fill>
                         <div className="space-y-3 w-full h-full overflow-y-auto max-h-96 lg:max-h-full scrollbar-custom pr-2">
                             {filteredIncomeList.length > 0 ? (
                                 [...filteredIncomeList]
@@ -255,7 +254,7 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                                                 </div>
                                                 {income.notes && <p className="text-xs text-gray-400 mt-2 italic">{income.notes}</p>}
                                             </div>
-                                            <div className="flex gap-2 ml-4 items-center">
+                                            <div className="flex gap-2 ms-4 items-center">
                                                 <span className="text-lg font-bold text-green-500 min-w-fit">
                                                     +{currency}{income.amount.toFixed(cDec)}
                                                 </span>
@@ -265,21 +264,21 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                                                         disabled={isPending}
                                                         className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded transition-colors disabled:opacity-50"
                                                     >
-                                                        Edit
+                                                        {t.income.editBtn}
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(income._id)}
                                                         disabled={isPending}
                                                         className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded transition-colors disabled:opacity-50"
                                                     >
-                                                        Delete
+                                                        {t.income.deleteBtn}
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
                                     ))
                             ) : (
-                                <p className="text-gray-400 text-center text-sm py-8">No income records for {MONTHS[currentMonth]} {currentYear}</p>
+                                <p className="text-gray-400 text-center text-sm py-8">{t.income.noRecordsFor(t.months[currentMonth], currentYear)}</p>
                             )}
                         </div>
                     </Card>

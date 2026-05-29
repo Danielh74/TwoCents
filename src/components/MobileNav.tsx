@@ -3,18 +3,20 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { BudgetIcon, DashboardIcon, ExpenseIcon, IncomeIcon, SettingsIcon, TransactionIcon } from './Icons'
-
-const NAV_ITEMS = [
-    { href: '/', label: 'Dashboard', Icon: DashboardIcon },
-    { href: '/income', label: 'Income', Icon: IncomeIcon },
-    { href: '/expenses', label: 'Expenses', Icon: ExpenseIcon },
-    { href: '/transactions', label: 'Transactions', Icon: TransactionIcon },
-    { href: '/budgets', label: 'Budgets', Icon: BudgetIcon },
-    { href: '/settings', label: 'Settings', Icon: SettingsIcon },
-]
+import { useTranslations } from '@/lib/translations'
 
 export default function MobileNav() {
     const pathname = usePathname()
+    const t = useTranslations()
+
+    const NAV_ITEMS = [
+        { href: '/', label: t.nav.dashboard, Icon: DashboardIcon },
+        { href: '/income', label: t.nav.income, Icon: IncomeIcon },
+        { href: '/expenses', label: t.nav.expenses, Icon: ExpenseIcon },
+        { href: '/transactions', label: t.nav.transactions, Icon: TransactionIcon },
+        { href: '/budgets', label: t.nav.budgets, Icon: BudgetIcon },
+        { href: '/settings', label: t.nav.settings, Icon: SettingsIcon },
+    ]
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex safe-bottom">

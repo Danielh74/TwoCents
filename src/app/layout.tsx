@@ -4,6 +4,7 @@ import "./globals.css";
 import Sidebar from '../components/Sidebar';
 import { ThemeProvider } from '../components/ThemeProvider'
 import { SettingsProvider } from '../lib/settings-context'
+import { DirectionProvider } from '../components/DirectionProvider'
 
 export const dynamic = 'force-dynamic';
 
@@ -36,7 +37,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-row bg-gray-100 dark:bg-gray-900 dark:text-white">
         <ThemeProvider>
           <SettingsProvider>
-            <aside className="flex w-14 mr-4 md:w-36 lg:w-48 shrink-0">
+            <DirectionProvider />
+            <aside className="flex w-14 me-4 md:w-36 lg:w-48 shrink-0">
               <Sidebar />
             </aside>
             <main className="flex-1 p-4 pb-4 rounded-2xl overflow-auto min-w-0">
