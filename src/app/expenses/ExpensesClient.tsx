@@ -130,7 +130,7 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
     }
 
     return (
-        <main className="flex md:h-[calc(100vh-2rem)] flex-col gap-3 p-4 md:min-h-0">
+        <main className="flex md:h-[calc(100vh-2rem)] flex-col gap-3 md:min-h-0">
             <div className="flex flex-wrap justify-between items-center mb-2 gap-3">
                 <h1 className="text-3xl font-bold">Expenses</h1>
                 <div className="flex items-center gap-4">

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Sidebar from '../components/Sidebar';
-import MobileNav from '../components/MobileNav';
 import { ThemeProvider } from '../components/ThemeProvider'
 import { SettingsProvider } from '../lib/settings-context'
 
@@ -37,13 +36,12 @@ export default function RootLayout({
       <body className="min-h-full flex flex-row bg-gray-100 dark:bg-gray-900 dark:text-white">
         <ThemeProvider>
           <SettingsProvider>
-            <aside className="hidden md:flex flex-1">
+            <aside className="flex w-14 mr-4 md:w-36 lg:w-48 shrink-0">
               <Sidebar />
             </aside>
-            <main className="flex-4 py-4 pr-4 pl-4 md:pl-0 pb-20 md:pb-4 rounded-2xl overflow-auto min-w-0">
+            <main className="flex-1 p-4 pb-4 rounded-2xl overflow-auto min-w-0">
               {children}
             </main>
-            <MobileNav />
           </SettingsProvider>
         </ThemeProvider>
       </body>

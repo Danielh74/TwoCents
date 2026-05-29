@@ -16,7 +16,7 @@ export async function createBudgetInDb(data: CreateBudgetInput) {
 
 export async function updateBudgetInDb(id: string, data: Partial<CreateBudgetInput>) {
     await dbConnect()
-    const budget = await BudgetModel.findByIdAndUpdate(id, data, { new: true, runValidators: true })
+    const budget = await BudgetModel.findByIdAndUpdate(id, data, { returnDocument: "after", runValidators: true })
     return JSON.parse(JSON.stringify(budget))
 }
 
