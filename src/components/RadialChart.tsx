@@ -64,7 +64,7 @@ export default function RadialChart({ data, colors = ['#3b82f6', '#ef4444'] }: P
     };
 
     return (
-        <ResponsiveContainer width='50%' height={270}>
+        <ResponsiveContainer width='100%' height={260}>
             <PieChart>
                 <Pie
                     data={data}

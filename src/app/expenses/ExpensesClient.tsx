@@ -4,6 +4,7 @@ import { use, useMemo, useState, useTransition } from 'react'
 import Card from '@/components/Card'
 import { budgets } from '@/lib/data'
 import { MONTHS } from '@/lib/utils'
+import { useSettings, formatDate } from '@/lib/settings-context'
 import type { Transaction, CreateTransactionInput } from '@/types/transaction'
 import { createTransactionData, updateTransactionAction, deleteTransactionAction } from '@/app/transactions/actions'
 
@@ -38,6 +39,9 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
     const [editingId, setEditingId] = useState<string | null>(null)
     const [formData, setFormData] = useState<ExpenseForm>(initialForm)
     const [isPending, startTransition] = useTransition()
+
+    const { currency, showCents, dateFormat } = useSettings()
+    const cDec = showCents ? 2 : 0
 
     const filteredExpenseList = useMemo(() => {
         return transactions
@@ -126,8 +130,8 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
     }
 
     return (
-        <main className="flex h-[calc(100vh-2rem)] flex-col gap-3 p-4 min-h-0">
-            <div className="flex justify-between items-center mb-2">
+        <main className="flex md:h-[calc(100vh-2rem)] flex-col gap-3 p-4 md:min-h-0">
+            <div className="flex flex-wrap justify-between items-center mb-2 gap-3">
                 <h1 className="text-3xl font-bold">Expenses</h1>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
@@ -137,13 +141,13 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
                     </div>
                     <div className="text-right border-l border-gray-300 pl-4">
                         <p className="text-gray-600">Total Expenses</p>
-                        <p className="text-3xl font-bold text-red-500">${totalExpenses.toFixed(2)}</p>
+                        <p className="text-3xl font-bold text-red-500">{currency}{totalExpenses.toFixed(cDec)}</p>
                     </div>
                 </div>
             </div>
 
-            <div className="flex gap-4 h-full overflow-hidden">
-                <div className="flex flex-1 gap-4 min-h-0">
+            <div className="flex flex-col lg:flex-row gap-4 lg:h-full overflow-auto lg:overflow-hidden">
+                <div className="flex flex-1 gap-4 lg:min-h-0">
                     <Card title={editingId ? "Edit Expense" : "Add New Expense"}>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
@@ -234,9 +238,9 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
                     </Card>
                 </div>
 
-                <div className="flex-1 min-w-0 min-h-0">
+                <div className="flex-1 min-w-0 lg:min-h-0">
                     <Card title="Expense List" fill>
-                        <div className="space-y-3 w-full overflow-y-auto max-h-full scrollbar-custom pr-2">
+                        <div className="space-y-3 w-full overflow-y-auto max-h-96 lg:max-h-full scrollbar-custom pr-2">
                             {filteredExpenseList.length > 0 ? (
                                 [...filteredExpenseList]
                                     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -249,13 +253,13 @@ export default function ExpensesClient({ transactionsPromise }: Props) {
                                                 <p className="font-medium text-gray-900 dark:text-white group-hover:text-black">{expense.title}</p>
                                                 <div className="flex gap-4 text-xs text-gray-500 mt-1">
                                                     <span>{expense.category}</span>
-                                                    <span>{expense.date}</span>
+                                                    <span>{formatDate(expense.date, dateFormat)}</span>
                                                 </div>
                                                 {expense.notes && <p className="text-xs text-gray-400 mt-2 italic">{expense.notes}</p>}
                                             </div>
                                             <div className="flex gap-2 ml-4 items-center">
                                                 <span className="text-lg font-bold text-red-500 min-w-fit">
-                                                    -${expense.amount.toFixed(2)}
+                                                    -{currency}{expense.amount.toFixed(cDec)}
                                                 </span>
                                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <button

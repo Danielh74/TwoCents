@@ -3,6 +3,7 @@
 import { use, useMemo, useState, useTransition } from 'react'
 import Card from '@/components/Card'
 import { MONTHS } from '@/lib/utils'
+import { useSettings, formatDate } from '@/lib/settings-context'
 import type { Transaction, CreateTransactionInput } from '@/types/transaction'
 import { createTransactionData, updateTransactionAction, deleteTransactionAction } from '@/app/transactions/actions'
 
@@ -37,6 +38,9 @@ export default function IncomeClient({ transactionsPromise }: Props) {
     const [editingId, setEditingId] = useState<string | null>(null)
     const [formData, setFormData] = useState<IncomeForm>(EMPTY_FORM)
     const [isPending, startTransition] = useTransition()
+
+    const { currency, showCents, dateFormat } = useSettings()
+    const cDec = showCents ? 2 : 0
 
     const filteredIncomeList = useMemo(() => {
         return transactions
@@ -125,8 +129,8 @@ export default function IncomeClient({ transactionsPromise }: Props) {
     }
 
     return (
-        <main className="flex h-[calc(100vh-2rem)] flex-col gap-3 p-4 min-h-0">
-            <header className="flex justify-between items-center mb-2">
+        <main className="flex md:h-[calc(100vh-2rem)] flex-col gap-3 p-4 md:min-h-0">
+            <header className="flex flex-wrap justify-between items-center mb-2 gap-3">
                 <h1 className="text-3xl font-bold">Income</h1>
                 <article className="flex items-center gap-4">
                     <section className="flex items-center gap-2">
@@ -136,13 +140,13 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                     </section>
                     <section className="text-right border-l border-gray-300 pl-4">
                         <p className="text-gray-600">Total Income</p>
-                        <p className="text-3xl font-bold text-green-500">${totalIncome.toFixed(2)}</p>
+                        <p className="text-3xl font-bold text-green-500">{currency}{totalIncome.toFixed(cDec)}</p>
                     </section>
                 </article>
             </header>
 
-            <div className="flex flex-1 gap-4 min-h-0">
-                <div className="flex-1 min-h-0">
+            <div className="flex flex-col lg:flex-row flex-1 gap-4 lg:min-h-0 overflow-auto lg:overflow-hidden">
+                <div className="flex-1 lg:min-h-0">
                     <Card title={editingId ? "Edit Income" : "Add New Income"}>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
@@ -232,9 +236,9 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                     </Card>
                 </div>
 
-                <div className="flex-1 min-w-0 min-h-0">
+                <div className="flex-1 min-w-0 lg:min-h-0">
                     <Card title="Income List" fill>
-                        <div className="space-y-3 w-full h-full overflow-y-auto scrollbar-custom pr-2">
+                        <div className="space-y-3 w-full h-full overflow-y-auto max-h-96 lg:max-h-full scrollbar-custom pr-2">
                             {filteredIncomeList.length > 0 ? (
                                 [...filteredIncomeList]
                                     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -247,13 +251,13 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                                                 <p className="font-medium text-gray-900 dark:text-white">{income.title}</p>
                                                 <div className="flex gap-4 text-xs text-gray-500 mt-1">
                                                     <span>{income.category}</span>
-                                                    <span>{income.date}</span>
+                                                    <span>{formatDate(income.date, dateFormat)}</span>
                                                 </div>
                                                 {income.notes && <p className="text-xs text-gray-400 mt-2 italic">{income.notes}</p>}
                                             </div>
                                             <div className="flex gap-2 ml-4 items-center">
                                                 <span className="text-lg font-bold text-green-500 min-w-fit">
-                                                    +${income.amount.toFixed(2)}
+                                                    +{currency}{income.amount.toFixed(cDec)}
                                                 </span>
                                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <button

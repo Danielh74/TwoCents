@@ -99,7 +99,7 @@ export default function BudgetsClient({ budgetsPromise, categoriesPromise }: Pro
             {showForm && (
                 <section>
                     <Card title={editingId ? 'Edit Budget' : 'Add New Budget'}>
-                        <form onSubmit={handleSubmit} className='flex gap-4 items-end'>
+                        <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-4 sm:items-end'>
                             <div className='flex-1'>
                                 <label className='block text-sm font-medium text-gray-700 mb-1'>Category *</label>
                                 <select
@@ -147,7 +147,7 @@ export default function BudgetsClient({ budgetsPromise, categoriesPromise }: Pro
                 </section>
             )}
 
-            <section className='grid grid-cols-4 gap-4 w-full'>
+            <section className='grid grid-cols-2 lg:grid-cols-4 gap-4 w-full'>
                 {budgets.map(budget => (
                     <div key={budget._id}>
                         <Card title={budget.category}>
@@ -175,7 +175,7 @@ export default function BudgetsClient({ budgetsPromise, categoriesPromise }: Pro
                     </div>
                 ))}
                 {budgets.length === 0 && (
-                    <p className='col-span-4 text-center text-gray-400 py-12'>No budgets yet. Add one to get started.</p>
+                    <p className='col-span-2 lg:col-span-4 text-center text-gray-400 py-12'>No budgets yet. Add one to get started.</p>
                 )}
             </section>
         </main>
