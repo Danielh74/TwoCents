@@ -12,16 +12,14 @@ type Props = {
 }
 
 function TransactionsList({ transactionsPromise }: Props) {
-    const initialTransactions = use(transactionsPromise)
+    const transactions = use(transactionsPromise);
 
-    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
-    const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
-    const [transactions, setTransactions] = useState(initialTransactions)
-    const [isPending, startTransition] = useTransition()
+    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
-    const { currency, showCents, dateFormat, language } = useSettings()
-    const t = useTranslations()
-    const cDec = showCents ? 2 : 0
+    const { currency, showCents, dateFormat, language } = useSettings();
+    const t = useTranslations();
+    const cDec = showCents ? 2 : 0;
 
     const [expenseList, incomeList] = useMemo(() => [
         transactions.filter((tx) => tx.type === 'expense'),
@@ -65,13 +63,6 @@ function TransactionsList({ transactionsPromise }: Props) {
         }
     }
 
-    const handleDelete = (id: string) => {
-        startTransition(async () => {
-            await deleteTransactionAction(id)
-            setTransactions((prev) => prev.filter((tx) => tx._id !== id))
-        })
-    }
-
     const renderTransaction = (tx: Transaction) => (
         <div
             key={tx._id}
@@ -89,15 +80,6 @@ function TransactionsList({ transactionsPromise }: Props) {
                 <span className={`text-lg font-bold min-w-fit ${tx.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
                     {tx.type === 'income' ? '+' : '-'}{currency}{tx.amount.toFixed(cDec)}
                 </span>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                        onClick={() => handleDelete(tx._id)}
-                        disabled={isPending}
-                        className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded transition-colors disabled:opacity-50"
-                    >
-                        {t.transactions.deleteBtn}
-                    </button>
-                </div>
             </div>
         </div>
     )

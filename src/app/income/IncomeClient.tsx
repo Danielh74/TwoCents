@@ -2,6 +2,7 @@
 
 import { use, useMemo, useState, useTransition } from 'react'
 import Card from '@/components/Card'
+import DeleteModal from '@/components/DeleteModal'
 import { useSettings, formatDate } from '@/lib/settings-context'
 import { useTranslations } from '@/lib/translations'
 import type { Transaction, CreateTransactionInput } from '@/types/transaction'
@@ -30,18 +31,20 @@ const EMPTY_FORM: IncomeForm = {
 export default function IncomeClient({ transactionsPromise }: Props) {
     const initialTransactions = use(transactionsPromise)
 
-    const [transactions, setTransactions] = useState(initialTransactions)
-    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
-    const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
-    const [editingId, setEditingId] = useState<string | null>(null)
-    const [formData, setFormData] = useState<IncomeForm>(EMPTY_FORM)
-    const [isPending, startTransition] = useTransition()
+    const [transactions, setTransactions] = useState(initialTransactions);
+    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+    const [filterCategory, setFilterCategory] = useState('');
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [formData, setFormData] = useState<IncomeForm>(EMPTY_FORM);
+    const [isPending, startTransition] = useTransition();
 
-    const { currency, showCents, dateFormat, language } = useSettings()
-    const t = useTranslations()
-    const cDec = showCents ? 2 : 0
+    const { currency, showCents, dateFormat, language } = useSettings();
+    const t = useTranslations();
+    const cDec = showCents ? 2 : 0;
 
-    const filteredIncomeList = useMemo(() => {
+    const monthlyIncomeList = useMemo(() => {
         return transactions
             .filter(tx => tx.type === 'income')
             .filter(tx => {
@@ -49,6 +52,16 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                 return year === currentYear && month === currentMonth + 1
             })
     }, [transactions, currentMonth, currentYear])
+
+    const availableCategories = useMemo(
+        () => [...new Set(monthlyIncomeList.map(tx => tx.category))].sort(),
+        [monthlyIncomeList]
+    )
+
+    const filteredIncomeList = useMemo(
+        () => filterCategory === '' ? monthlyIncomeList : monthlyIncomeList.filter(tx => tx.category === filterCategory),
+        [monthlyIncomeList, filterCategory]
+    )
 
     const totalIncome = useMemo(
         () => filteredIncomeList.reduce((sum, tx) => sum + tx.amount, 0),
@@ -109,8 +122,10 @@ export default function IncomeClient({ transactionsPromise }: Props) {
         }
     }
 
-    const handleDelete = (id: string) => {
-        if (!confirm(t.income.confirmDelete)) return
+    const handleDeleteConfirm = () => {
+        if (!deletingId) return
+        const id = deletingId
+        setDeletingId(null)
         startTransition(async () => {
             await deleteTransactionAction(id)
             setTransactions(prev => prev.filter(tx => tx._id !== id))
@@ -118,17 +133,30 @@ export default function IncomeClient({ transactionsPromise }: Props) {
     }
 
     const handlePreviousMonth = () => {
+        setFilterCategory('')
         if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1) }
         else setCurrentMonth(currentMonth - 1)
     }
 
     const handleNextMonth = () => {
+        setFilterCategory('')
         if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1) }
         else setCurrentMonth(currentMonth + 1)
     }
 
     return (
         <main className="flex md:h-[calc(100vh-2rem)] flex-col gap-3 p-4 md:min-h-0">
+            {deletingId && (
+                <DeleteModal
+                    title={t.income.deleteTitle}
+                    message={t.income.confirmDelete}
+                    confirmLabel={t.income.deleteBtn}
+                    cancelLabel={t.income.cancelBtn}
+                    onConfirm={handleDeleteConfirm}
+                    onCancel={() => setDeletingId(null)}
+                />
+            )}
+
             <header className="flex flex-wrap justify-between items-center mb-2 gap-3">
                 <h1 className="text-3xl font-bold">{t.income.title}</h1>
                 <article className="flex items-center gap-4">
@@ -237,6 +265,19 @@ export default function IncomeClient({ transactionsPromise }: Props) {
 
                 <div className="flex-1 min-w-0 lg:min-h-0">
                     <Card title={t.income.incomeList} fill>
+                        <div className="mb-3 shrink-0">
+                            <select
+                                value={filterCategory}
+                                onChange={e => setFilterCategory(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                aria-label={t.income.filterByCategory}
+                            >
+                                <option value="">{t.income.allCategories}</option>
+                                {availableCategories.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                        </div>
                         <div className="space-y-3 w-full h-full overflow-y-auto max-h-96 lg:max-h-full scrollbar-custom pr-2">
                             {filteredIncomeList.length > 0 ? (
                                 [...filteredIncomeList]
@@ -267,7 +308,7 @@ export default function IncomeClient({ transactionsPromise }: Props) {
                                                         {t.income.editBtn}
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDelete(income._id)}
+                                                        onClick={() => setDeletingId(income._id)}
                                                         disabled={isPending}
                                                         className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded transition-colors disabled:opacity-50"
                                                     >

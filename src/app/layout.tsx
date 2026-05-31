@@ -38,10 +38,9 @@ export default function RootLayout({
         <ThemeProvider>
           <SettingsProvider>
             <DirectionProvider />
-            <aside className="flex w-14 me-4 md:w-36 lg:w-48 shrink-0">
-              <Sidebar />
-            </aside>
-            <main className="flex-1 p-4 pb-4 rounded-2xl overflow-auto min-w-0">
+            <Sidebar />
+            <aside className="hidden md:flex md:w-48 lg:w-52 shrink-0" />
+            <main className="flex-1 p-4 pb-20 md:pb-4 rounded-2xl overflow-auto min-w-0">
               {children}
             </main>
           </SettingsProvider>

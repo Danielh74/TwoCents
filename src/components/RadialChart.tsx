@@ -1,5 +1,6 @@
 'use client';
 
+import { useSettings } from '@/lib/settings-context';
 import { useState } from 'react';
 import { PieChart, Pie, Sector, Legend, Tooltip, ResponsiveContainer, PieSectorShapeProps } from 'recharts';
 
@@ -18,6 +19,8 @@ interface DataItem {
 
 export default function RadialChart({ data, colors = ['#3b82f6', '#ef4444'] }: PieChartProps) {
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+    const { currency } = useSettings();
 
     const renderCustomShape = (props: PieSectorShapeProps) => {
         const isActive = activeIndex === props.index;
@@ -78,7 +81,7 @@ export default function RadialChart({ data, colors = ['#3b82f6', '#ef4444'] }: P
                     shape={renderCustomShape}
                     isAnimationActive={false}
                 />
-                <Tooltip formatter={(value) => `$${value}`} />
+                <Tooltip formatter={(value) => `${currency}${value}`} />
                 <Legend content={renderCustomLegend} />
             </PieChart>
         </ResponsiveContainer>
