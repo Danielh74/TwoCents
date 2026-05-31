@@ -42,7 +42,7 @@ function Sidebar() {
                             className={`flex flex-col items-center gap-0.5 px-1 py-1 rounded-lg transition-colors ${pathName === href ? 'text-blue-500' : 'text-gray-500 dark:text-gray-400'}`}
                         >
                             <Icon />
-                            <span className="text-[10px] font-medium leading-tight truncate max-w-[52px] text-center">{label}</span>
+                            <span className="text-[10px] font-medium leading-tight truncate max-w-13 text-center">{label}</span>
                         </Link>
                     ))}
                 </div>

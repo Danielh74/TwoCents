@@ -2,8 +2,7 @@
 
 import Card from '@/components/Card';
 import { Transaction } from '@/types/transaction';
-import { deleteTransactionAction } from './actions';
-import { use, useMemo, useState, useTransition } from 'react'
+import { use, useMemo, useState } from 'react'
 import { useSettings, formatDate } from '@/lib/settings-context'
 import { useTranslations } from '@/lib/translations'
 

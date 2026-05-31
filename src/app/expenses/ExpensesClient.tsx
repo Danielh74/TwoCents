@@ -94,7 +94,7 @@ export default function ExpensesClient({ transactionsPromise, budgetsPromise }: 
         setFormData(initialForm)
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.SubmitEvent) => {
         e.preventDefault()
 
         if (!formData.title || !formData.amount || !formData.category || !formData.date) {
