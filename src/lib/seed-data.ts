@@ -1,4 +1,4 @@
-import type { TransactionFormType as CreateTransactionInput } from '@/types/transaction'
+import type { TransactionFormType } from '@/types/transaction'
 import type { CreateCategoryInput } from '@/types/category'
 import type { CreateBudgetInput } from '@/types/budget'
 
@@ -30,7 +30,7 @@ export const seedBudgets: CreateBudgetInput[] = [
     { category: 'Subscriptions', value: 50 },
 ]
 
-export const seedTransactions: CreateTransactionInput[] = [
+export const seedTransactions: TransactionFormType[] = [
     // ── January ──────────────────────────────────────────────────────────────
     { title: 'Monthly Salary', type: 'income', amount: 5200, category: 'Salary', date: '2026-01-01', notes: 'January paycheck' },
     { title: 'Freelance Project', type: 'income', amount: 850, category: 'Freelance', date: '2026-01-14' },
