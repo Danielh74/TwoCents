@@ -1,5 +1,5 @@
-import IncomeClient from './IncomeClient'
+import TransactionPageClient from '@/components/TransactionPageClient'
 
 export default function IncomePage() {
-    return <IncomeClient />
+    return <TransactionPageClient type="income" />
 }

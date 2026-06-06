@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import ExpensesClient from './ExpensesClient'
+import TransactionPageClient from '@/components/TransactionPageClient'
 import { getBudgetsFromDb } from '@/lib/db/budgets'
 
 export default function ExpensesPage() {
@@ -7,7 +7,7 @@ export default function ExpensesPage() {
 
     return (
         <Suspense fallback={<main className="flex h-[calc(100vh-2rem)] items-center justify-center p-4">Loading...</main>}>
-            <ExpensesClient budgetsPromise={budgetsPromise} />
+            <TransactionPageClient type="expense" budgetsPromise={budgetsPromise} />
         </Suspense>
     )
 }

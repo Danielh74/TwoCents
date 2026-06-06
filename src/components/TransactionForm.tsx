@@ -1,92 +1,71 @@
-import React, { useEffect, useState, useTransition } from 'react'
+import React, { useEffect, useTransition } from 'react'
 import Card from './Card'
-import { useTranslations } from '@/lib/translations';
+import { useTranslations } from '@/lib/translations'
 import type { TransactionFormType, TransactionType } from '@/types/transaction'
-import { useTransactions } from '@/lib/transactions-context';
-import { useForm } from 'react-hook-form';
+import { useTransactions } from '@/lib/transactions-context'
+import { useForm } from 'react-hook-form'
 
 type Props = {
-    id: string | null;
-    type: TransactionType;
-    dataToEdit?: TransactionFormType;
-    expensesCategories?: string[]
+    id: string | null
+    type: TransactionType
+    dataToEdit: TransactionFormType
+    expensesCategories: string[]
+    onCancel: () => void
 }
 
-
-
-function TransactionForm({ id = null, type, dataToEdit, expensesCategories = [] }: Props) {
-    const { updateTransaction, createTransaction } = useTransactions()
-    const t = useTranslations();
-    const [editingId, setEditingId] = useState<string | null>(id);
-    const EMPTY_FORM: TransactionFormType = {
+function makeEmptyForm(type: TransactionType): TransactionFormType {
+    return {
         title: '',
         amount: 0.00,
         category: '',
         date: new Date().toISOString().split('T')[0],
         notes: '',
-        type: type,
+        type,
     }
+}
+
+function TransactionForm({ id = null, type, dataToEdit, expensesCategories = [], onCancel }: Props) {
+    const { updateTransaction, createTransaction } = useTransactions()
+    const t = useTranslations()
+    const [isPending, startTransition] = useTransition()
+
     const { register, handleSubmit, reset, formState: { errors } } = useForm<TransactionFormType>({
-        defaultValues: EMPTY_FORM
+        defaultValues: makeEmptyForm(type)
     })
 
-    const [isPending, startTransition] = useTransition();
-    const transactionType = type === 'income' ? t.income : t.expenses;
-    const transactionCategories = type === 'income' ? t.income.categories : expensesCategories;
-
+    const transactionType = type === 'income' ? t.income : t.expenses
+    const transactionCategories = type === 'income' ? t.income.categories : expensesCategories
 
     useEffect(() => {
-        const changeTransactionToEdit = () => {
-            setEditingId(id);
-
-            if (id && dataToEdit) {
-                reset(dataToEdit);
-            } else {
-                reset(EMPTY_FORM)
-            }
+        if (id) {
+            reset(dataToEdit)
+        } else {
+            reset(makeEmptyForm(type))
         }
-
-        changeTransactionToEdit();
-    }, [dataToEdit, id, reset]);
+    }, [dataToEdit, id, type, reset])
 
     const onSubmit = (data: TransactionFormType) => {
-
-        // if (!formData.title || !formData.amount || !formData.category || !formData.date) {
-        //     alert(transactionType.fillRequired)
-        //     return
-        // }
-
-        const transactionData: TransactionFormType = {
-            title: data.title,
-            amount: data.amount,
-            category: data.category,
-            date: data.date,
-            notes: data.notes,
-            type: type,
-        }
-
-        if (editingId !== null) {
+        if (id !== null) {
             startTransition(async () => {
-                await updateTransaction(editingId, data);
-                setEditingId(null);
-                reset(EMPTY_FORM);
+                await updateTransaction(id, data)
+                reset(makeEmptyForm(type))
+                onCancel()
             })
         } else {
             startTransition(async () => {
-                await createTransaction(data);
-                reset(EMPTY_FORM);
+                await createTransaction(data)
+                reset(makeEmptyForm(type))
             })
         }
     }
 
     const handleCancel = () => {
-        setEditingId(null);
-        reset(EMPTY_FORM);
+        reset(makeEmptyForm(type))
+        onCancel()
     }
 
     return (
-
-        <Card title={editingId ? transactionType.editTitle : transactionType.addNew}>
+        <Card title={id ? transactionType.editTitle : transactionType.addNew}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">{transactionType.titleField}</label>
@@ -108,10 +87,7 @@ function TransactionForm({ id = null, type, dataToEdit, expensesCategories = [] 
                             id="amount"
                             {...register("amount", {
                                 required: 'Amount is required',
-                                min: {
-                                    value: 0.01,
-                                    message: 'Amount must be greater than 0'
-                                }
+                                min: { value: 0.01, message: 'Amount must be greater than 0' }
                             })}
                             placeholder="0.00"
                             step="0.01"
@@ -143,10 +119,7 @@ function TransactionForm({ id = null, type, dataToEdit, expensesCategories = [] 
                         id="date"
                         {...register("date", {
                             required: 'Date is required',
-                            max: {
-                                value: new Date().toISOString().split('T')[0],
-                                message: "Date cannot be in the future"
-                            }
+                            max: { value: new Date().toISOString().split('T')[0], message: "Date cannot be in the future" }
                         })}
                         className={`w-full px-3 py-2 border ${errors.date ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500`}
                     />
@@ -170,9 +143,9 @@ function TransactionForm({ id = null, type, dataToEdit, expensesCategories = [] 
                         disabled={isPending}
                         className={`flex-1 ${type === 'income' ? 'bg-green-500' : 'bg-red-500'} hover:cursor-pointer hover:${type === 'income' ? 'bg-green-600' : 'bg-red-600'} text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50`}
                     >
-                        {editingId ? transactionType.updateBtn : transactionType.addBtn}
+                        {id ? transactionType.updateBtn : transactionType.addBtn}
                     </button>
-                    {editingId && (
+                    {id && (
                         <button
                             type="button"
                             onClick={handleCancel}

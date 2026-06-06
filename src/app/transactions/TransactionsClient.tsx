@@ -1,7 +1,8 @@
 'use client';
 
 import Card from '@/components/Card';
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useMonthNavigation } from '@/lib/hooks/useMonthNavigation'
 import { useSettings, formatDate } from '@/lib/settings-context'
 import { useTranslations } from '@/lib/translations'
 import type { Transaction } from '@/types/transaction'
@@ -10,8 +11,7 @@ import { useTransactions } from '@/lib/transactions-context'
 export default function TransactionsList() {
     const { transactions } = useTransactions()
 
-    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+    const { currentMonth, currentYear, handlePreviousMonth, handleNextMonth } = useMonthNavigation()
 
     const { currency, showCents, dateFormat, language } = useSettings();
     const t = useTranslations();
@@ -40,24 +40,6 @@ export default function TransactionsList() {
         () => filteredTransactions.incomes.reduce((sum, tx) => sum + tx.amount, 0),
         [filteredTransactions]
     )
-
-    const handlePreviousMonth = () => {
-        if (currentMonth === 0) {
-            setCurrentMonth(11)
-            setCurrentYear(currentYear - 1)
-        } else {
-            setCurrentMonth(currentMonth - 1)
-        }
-    }
-
-    const handleNextMonth = () => {
-        if (currentMonth === 11) {
-            setCurrentMonth(0)
-            setCurrentYear(currentYear + 1)
-        } else {
-            setCurrentMonth(currentMonth + 1)
-        }
-    }
 
     const renderTransaction = (tx: Transaction) => (
         <div

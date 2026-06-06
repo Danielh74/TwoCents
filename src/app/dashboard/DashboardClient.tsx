@@ -1,6 +1,8 @@
 'use client'
 
-import { use, useState, useMemo } from 'react'
+import { use } from 'react'
+import { useMonthNavigation } from '@/lib/hooks/useMonthNavigation'
+import { useDashboardData } from '@/lib/hooks/useDashboardData'
 import Card from "@/components/Card"
 import RadialChart from "@/components/RadialChart"
 import ProgressBar from '@/components/ProgressBar'
@@ -21,115 +23,28 @@ export default function DashboardClient({ budgetsPromise }: Props) {
     const { transactions } = useTransactions()
     const budgets = use(budgetsPromise)
 
-    const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
-    const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
+    const { currentMonth, currentYear, handlePreviousMonth, handleNextMonth } = useMonthNavigation()
 
-    const t = useTranslations();
-    const { currency, showCents, language } = useSettings();
+    const t = useTranslations()
+    const { currency, showCents, language } = useSettings()
     const cDec = showCents ? 2 : 0
 
-    const filteredData = useMemo(() =>
-        transactions.filter(tx => {
-            const [year, month] = tx.date.split('-').map(Number)
-            return year === currentYear && month === currentMonth + 1
-        }),
-        [currentMonth, currentYear, transactions]
-    )
-
-    const { incomeAmount, expensesAmount, balance } = useMemo(() =>
-        filteredData.reduce(
-            (acc, tx) => {
-                if (tx.type === 'expense') {
-                    acc.expensesAmount += tx.amount
-                    acc.balance -= tx.amount
-                } else {
-                    acc.incomeAmount += tx.amount
-                    acc.balance += tx.amount
-                }
-                return acc
-            },
-            { incomeAmount: 0, expensesAmount: 0, balance: 0 }
-        ),
-        [filteredData]
-    )
-
-    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1
-    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear
-
-    const prevMonthData = useMemo(() =>
-        transactions
-            .filter(tx => {
-                const [year, month] = tx.date.split('-').map(Number)
-                return year === prevYear && month === prevMonth + 1
-            })
-            .reduce(
-                (acc, tx) => {
-                    if (tx.type === 'expense') acc.expenses += tx.amount
-                    else acc.income += tx.amount
-                    return acc
-                },
-                { income: 0, expenses: 0 }
-            ),
-        [prevMonth, prevYear, transactions]
-    )
-
-    const savingsRate = incomeAmount > 0 ? ((incomeAmount - expensesAmount) / incomeAmount) * 100 : 0
+    const {
+        filteredData,
+        incomeAmount,
+        expensesAmount,
+        balance,
+        prevMonthData,
+        savingsRate,
+        monthlyExpenses,
+        topCategories,
+        sortedTransactions,
+    } = useDashboardData(transactions, budgets, currentMonth, currentYear)
 
     const chartData = [
         { name: t.dashboard.income, value: incomeAmount },
         { name: t.dashboard.expenses, value: expensesAmount },
     ]
-
-    const monthlyExpenses = useMemo(() =>
-        budgets
-            .map(budget => {
-                const totalExpense = transactions
-                    .filter(tx => {
-                        const [year, month] = tx.date.split('-').map(Number)
-                        return tx.type === 'expense' && tx.category === budget.category && year === currentYear && month === currentMonth + 1
-                    })
-                    .reduce((sum, tx) => sum + tx.amount, 0)
-                return {
-                    category: budget.category,
-                    budget: budget.value,
-                    expense: totalExpense,
-                    remaining: budget.value - totalExpense,
-                }
-            })
-            .sort((a, b) => (b.expense / b.budget) - (a.expense / a.budget)),
-        [currentMonth, currentYear, transactions, budgets]
-    )
-
-    const topCategories = useMemo(() => {
-        const map: Record<string, number> = {}
-        filteredData.filter(tx => tx.type === 'expense').forEach(tx => {
-            map[tx.category] = (map[tx.category] || 0) + tx.amount
-        })
-        return Object.entries(map).sort(([, a], [, b]) => b - a).slice(0, 3)
-    }, [filteredData])
-
-    const sortedTransactions = useMemo(() =>
-        [...filteredData].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-        [filteredData]
-    )
-
-    const handlePreviousMonth = () => {
-        if (currentMonth === 0) {
-            setCurrentMonth(11)
-            setCurrentYear(currentYear - 1)
-        } else {
-            setCurrentMonth(currentMonth - 1)
-        }
-    }
-
-    const handleNextMonth = () => {
-        if (currentMonth === 11) {
-            setCurrentMonth(0)
-            setCurrentYear(currentYear + 1)
-        } else {
-            setCurrentMonth(currentMonth + 1)
-        }
-    }
 
     return (
         <main className="flex flex-col gap-4 md:h-[calc(100vh-2rem)] md:min-h-0">

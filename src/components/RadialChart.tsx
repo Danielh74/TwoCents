@@ -1,7 +1,7 @@
 'use client';
 
-import { useSettings } from '@/lib/settings-context';
 import { useState } from 'react';
+import { useSettings } from '@/lib/settings-context';
 import { PieChart, Pie, Sector, Legend, Tooltip, ResponsiveContainer, PieSectorShapeProps } from 'recharts';
 
 interface PieChartProps {

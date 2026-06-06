@@ -1,4 +1,4 @@
-import type { CreateTransactionInput } from '@/types/transaction'
+import type { TransactionFormType as CreateTransactionInput } from '@/types/transaction'
 import type { CreateCategoryInput } from '@/types/category'
 import type { CreateBudgetInput } from '@/types/budget'
 
