@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/mongodb";
 import Transaction from "@/models/Transaction";
-import type { CreateTransactionInput } from "@/types/transaction";
+import { TransactionFormType } from "@/types/transaction";
 
 export async function getTransactionsFromDb() {
     await dbConnect();
@@ -10,21 +10,21 @@ export async function getTransactionsFromDb() {
     return JSON.parse(JSON.stringify(transactions));
 }
 
-export async function createTransactionInDb(data: CreateTransactionInput) {
+export async function createTransactionInDb(transactionData: TransactionFormType) {
     await dbConnect();
 
-    const transaction = await Transaction.create(data);
+    const transaction = await Transaction.create(transactionData);
 
     return JSON.parse(JSON.stringify(transaction));
 }
 
 export async function updateTransactionInDb(
     id: string,
-    data: Partial<CreateTransactionInput>
+    transactionData: TransactionFormType
 ) {
     await dbConnect();
 
-    const transaction = await Transaction.findByIdAndUpdate(id, data, {
+    const transaction = await Transaction.findByIdAndUpdate(id, transactionData, {
         returnDocument: "after",
         runValidators: true,
     });

@@ -7,19 +7,18 @@ import ProgressBar from '@/components/ProgressBar'
 import TransactionInfo from '@/components/TransactionInfo'
 import { fmt } from '@/lib/utils'
 import { BudgetIcon, ExpenseIcon, IncomeIcon, SavingsIcon } from '@/components/Icons'
-import type { Transaction } from '@/types/transaction'
 import type { Budget } from '@/types/budget'
 import StatCard from '@/components/StatCard'
 import { useSettings } from '@/lib/settings-context'
 import { useTranslations } from '@/lib/translations'
+import { useTransactions } from '@/lib/transactions-context'
 
 type Props = {
-    transactionsPromise: Promise<Transaction[]>
     budgetsPromise: Promise<Budget[]>
 }
 
-export default function DashboardClient({ transactionsPromise, budgetsPromise }: Props) {
-    const transactions = use(transactionsPromise)
+export default function DashboardClient({ budgetsPromise }: Props) {
+    const { transactions } = useTransactions()
     const budgets = use(budgetsPromise)
 
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())

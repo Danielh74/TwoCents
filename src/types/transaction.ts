@@ -10,7 +10,7 @@ export type Transaction = {
     type: TransactionType;
 };
 
-export type CreateTransactionInput = {
+export type TransactionFormType = {
     title: string;
     amount: number;
     category: string;

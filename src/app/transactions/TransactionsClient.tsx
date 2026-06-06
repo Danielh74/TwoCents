@@ -1,17 +1,14 @@
 'use client';
 
 import Card from '@/components/Card';
-import { Transaction } from '@/types/transaction';
-import { use, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSettings, formatDate } from '@/lib/settings-context'
 import { useTranslations } from '@/lib/translations'
+import type { Transaction } from '@/types/transaction'
+import { useTransactions } from '@/lib/transactions-context'
 
-type Props = {
-    transactionsPromise: Promise<Transaction[]>
-}
-
-function TransactionsList({ transactionsPromise }: Props) {
-    const transactions = use(transactionsPromise);
+export default function TransactionsList() {
+    const { transactions } = useTransactions()
 
     const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -134,5 +131,3 @@ function TransactionsList({ transactionsPromise }: Props) {
         </main>
     )
 }
-
-export default TransactionsList

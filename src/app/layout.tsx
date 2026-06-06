@@ -5,6 +5,8 @@ import Sidebar from '../components/Sidebar';
 import { ThemeProvider } from '../components/ThemeProvider'
 import { SettingsProvider } from '../lib/settings-context'
 import { DirectionProvider } from '../components/DirectionProvider'
+import { TransactionsProvider } from '../lib/transactions-context'
+import { getTransactionsFromDb } from '../lib/db/transactions'
 
 export const dynamic = 'force-dynamic';
 
@@ -23,11 +25,13 @@ export const metadata: Metadata = {
   description: "Your personal finance tracker",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialTransactions = await getTransactionsFromDb();
+
   return (
     <html
       lang="en"
@@ -37,12 +41,14 @@ export default function RootLayout({
       <body className="min-h-full flex flex-row bg-gray-100 dark:bg-gray-900 dark:text-white">
         <ThemeProvider>
           <SettingsProvider>
-            <DirectionProvider />
-            <Sidebar />
-            <aside className="hidden md:flex md:w-48 lg:w-52 shrink-0" />
-            <main className="flex-1 p-4 pb-20 md:pb-4 rounded-2xl overflow-auto min-w-0">
-              {children}
-            </main>
+            <TransactionsProvider initialTransactions={initialTransactions}>
+              <DirectionProvider />
+              <Sidebar />
+              <aside className="hidden md:flex md:w-48 lg:w-52 shrink-0" />
+              <main className="flex-1 p-4 pb-20 md:pb-4 rounded-2xl overflow-auto min-w-0">
+                {children}
+              </main>
+            </TransactionsProvider>
           </SettingsProvider>
         </ThemeProvider>
       </body>
